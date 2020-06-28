@@ -1,4 +1,6 @@
 import javafx.animation.PathTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -38,9 +40,12 @@ public class grid_layout extends Application
 	int[][] distance;
 	Random r = new Random();
 
+	Line path = new Line();
+
+
 
 	@Override
-	public void start(Stage stage) throws Exception
+	public void start(Stage stage)
 	{
 
 		// load the image
@@ -49,9 +54,14 @@ public class grid_layout extends Application
 		robot.setImage(image);
 		robot.setCache(true);
 		robot.setFitHeight(30);
-		robot.setX(200-15);
-		robot.setY(200-15);
+		robot.setX(250-15);
+		robot.setY(250-15);
 		robot.setPreserveRatio(true);
+
+
+
+		path.setStroke(Color.DARKBLUE);
+		path.setVisible(true);
 
 		Circle circle = new Circle();
 		Circle circle_start = new Circle();
@@ -64,6 +74,8 @@ public class grid_layout extends Application
 		circle_start.setRadius(5);
 		circle_start.setCenterX(robot.getX()+15);
 		circle_start.setCenterY(robot.getY()+15);
+
+
 
 
 		Pane pane = new Pane();
@@ -111,8 +123,10 @@ public class grid_layout extends Application
 		x_coor.setMaxWidth(80);
 		y_coor.setPrefWidth(80);
 		y_coor.setMaxWidth(80);
-		x_coor.setText(String.valueOf((int) robot.getX()+15));
-		y_coor.setText(String.valueOf((int) robot.getY()+15));
+		x_coor.setText("200");
+		y_coor.setText("200");
+		//x_coor.setText(String.valueOf((int) robot.getX()+15));
+		//y_coor.setText(String.valueOf((int) robot.getY()+15));
 		info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 
 		/**
@@ -160,7 +174,8 @@ public class grid_layout extends Application
 			}
 			 **/
 			//movement(robot,-1,0,info_text);
-			movement(robot,-1,0, circle_start);
+			movementX(robot,-1,0, circle_start);
+			//movement(robot,-1,0, circle_start);
 			info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 			System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 		});
@@ -175,7 +190,8 @@ public class grid_layout extends Application
 				robot.setX(robot.getX()+50);
 			}
 			 **/
-			movement(robot,1,0,circle_start);
+			movementX(robot,1,0, circle_start);
+			//movement(robot,1,0,circle_start);
 
 			info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 			System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
@@ -185,7 +201,8 @@ public class grid_layout extends Application
 		{
 			//double test = robot.getY()+50;
 			//System.out.println("TEST Down: "+test);
-			movement(robot,0,1, circle_start);
+			movementY(robot,0,1, circle_start);
+			//movement(robot,0,1, circle_start);
 			/**
 			if(test <= 435)
 			{
@@ -201,8 +218,8 @@ public class grid_layout extends Application
 
 		bt_up.setOnAction(e ->
 		{
-
-			movement(robot,0,-1, circle_start);
+			movementY(robot,0,-1, circle_start);
+			//movement(robot,0,-1, circle_start);
 			/**
 			double test = robot.getY()-50;
 			if(test >=35)
@@ -219,26 +236,21 @@ public class grid_layout extends Application
 		});
 
 		bt_turnL.setOnAction(e ->
-		{
-
-			robot.setRotate(robot.getRotate()-90);
-
-
-
-		});
+				robot.setRotate(robot.getRotate()-90));
 
 		bt_turnR.setOnAction(e ->
-		{
-
-			robot.setRotate(robot.getRotate()+90);
-
-		});
+				robot.setRotate(robot.getRotate()+90));
 
 		bt_reset.setOnAction(e ->
 		{
+			xbuffer=0;
+			ybuffer=0;
 
-			robot.setX(200-15);
-			robot.setY(200-15);
+			//int x = Integer.parseInt(x_coor.getText());
+			robot.setX((Integer.parseInt(x_coor.getText()))+35);
+			robot.setY((Integer.parseInt(y_coor.getText()))+35);
+			//robot.setX(250-15);
+			//robot.setY(250-15);
 			robot.setRotate(0);
 			info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 
@@ -246,11 +258,12 @@ public class grid_layout extends Application
 
 		bt_movement.setOnAction(e ->
 		{
-			int y = Integer.parseInt(move_count.getText());
-			int x=0;
-			movement(robot,x,y, circle_start);
-			x_coor.setText(String.valueOf(robot.getX()+15));
-			y_coor.setText(String.valueOf(robot.getY()));
+			//int y = Integer.parseInt(move_count.getText());
+			//int x=0;
+			movement(robot,1,2, circle_start);
+			//movementX(robot,1,2,circle_start);
+			//x_coor.setText(String.valueOf(robot.getX()+15));
+			//y_coor.setText(String.valueOf(robot.getY()));
 
 		});
 
@@ -266,24 +279,27 @@ public class grid_layout extends Application
 
 		bt_Find_path.setOnAction(e ->
 		{
-
+			xbuffer=0;
+			ybuffer=0;
+			//setRobotXABSOLUTE(robot.getX()+15);
 			circle_start.setCenterX(robot.getX()+15);
 			circle_start.setCenterY(robot.getY()+15);
-
 			makeArray(circle,robot);
 			findDistance(array);
 
-			searchPath(robot,0, pane,circle_start, 0,(int) (robot.getX()+15)/50-1,(int) (robot.getX()+15)/50-1);
+			searchPath(robot,0,path, pane,circle_start, 0,(int) (robot.getX()+15)/50-1,(int) (robot.getX()+15)/50-1);
 
 			//find_path(circle,robot);
 		});
 
 
+
+		pane.getChildren().addAll(circle,circle_start,robot,path);
 		vBox.getChildren().addAll(x_coor,y_coor,bt_turnL,bt_turnR,bt_left,bt_right,bt_down,bt_up,bt_reset,bt_circle_ran);
 		//hBox1.getChildren().addAll(bt_left,bt_right,bt_down,bt_up);
 		hBox1.getChildren().addAll(move_count,bt_movement,bt_Find_path);
 		hBox2.getChildren().addAll(info_text);
-		pane.getChildren().addAll(circle,circle_start,robot);
+		//
 
 
 		//Scene scene = new Scene(pane,HORIZ,VERTI); // horizon , vertik
@@ -303,14 +319,38 @@ public class grid_layout extends Application
 
 
 
+
+
+
 	//public void movement(ImageView robot, int x,int y, Text info_text)
-	public void movement(ImageView robot, int x, int y, Circle circle_start)
+
+	public void movementX(ImageView robot, int x, int y, Circle circle_start)
 	{
 
-		System.out.println("In Movement funtion");
+
 
 		int distanceX = x * 50;
 		int distanceY = y * 50;
+
+		int curX = (int) (robot.getX()+15);
+		int curY= (int) (robot.getY()+15);
+		System.out.println("\n------Movement X -----");
+		System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
+		System.out.println("curX "+curX+" |  curY "+curY);
+
+
+		PathTransition mover = new PathTransition();
+		Line pathAnimation = new Line();
+
+		SequentialTransition seqT = new SequentialTransition();
+		//PauseTransition p = new PauseTransition(Duration.millis(2500));
+		//p.setOnFinished(e -> movementY(robot, x, y, circle_start));
+		mover.setOnFinished(e -> movementY(robot, x, y, circle_start));
+
+		pathAnimation.setStartX(robot.getX()+15);
+		pathAnimation.setStartY(robot.getY()+15);
+
+
 
 		if (distanceX>0)    //right
 		{
@@ -318,15 +358,32 @@ public class grid_layout extends Application
 
 			System.out.println("Moving Right "+x+"x   Distance is: "+distanceX);
 			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
+			System.out.println("Moving to X "+(curX+distanceX));
 
-			PathTransition pt = new PathTransition(Duration.millis(2900), new Line(robot.getX()+15, robot.getY()+15, robot.getX()+distanceX+15, robot.getY()+15), robot);
-			//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			//pt.setCycleCount(Timeline.INDEFINITE);
-			pt.play(); // Start animation
+			pathAnimation.setEndX(curX+distanceX);
+			pathAnimation.setEndY(robot.getY()+15);
+			mover.setDuration(Duration.millis(1500));
+			mover.setPath(pathAnimation);
+			mover.setNode(robot);
+			//mover.play();
+			//seqT.getChildren().addAll(mover);
+			//seqT.play();
 
-			//robot.setX(robot.getX()+distanceX);
+			robot.setX((curX+distanceX-15));
+			robot.setY(curY-15);
 
-			//info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
+			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
+
+			/**
+			path.setEndX((curX+distanceX-15));
+			path.setEndY((curY-15));
+			path.setStartX((curX+distanceX-15));
+			path.setStartY((curY-15));
+			**/
+
+
+
+
 
 		}else if (distanceX<0) //Left
 		{
@@ -334,17 +391,203 @@ public class grid_layout extends Application
 
 			rotate(robot,-90);
 
+			//pathAnimation.setStartX(robot.getX()+15);
+			//pathAnimation.setStartY(robot.getY()+15);
+			pathAnimation.setEndX(curX-distanceX);
+			pathAnimation.setEndY(robot.getY()+15);
+			mover.setDuration(Duration.millis(1500));
+			mover.setPath(pathAnimation);
+			mover.setNode(robot);
+			//mover.play();
+
+
 
 			System.out.println("Moving Left "+x+"x   Distance is: -"+distanceX);
 			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
 
-			PathTransition pt = new PathTransition(Duration.millis(2500), new Line(robot.getX()+15, robot.getY()+15,  robot.getX()-distanceX+15, robot.getY()+15), robot);
-			//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			//pt.setCycleCount(Timeline.INDEFINITE);
-			pt.play(); // Start animation
+			robot.setX((curX-distanceX-15));
+			robot.setY(curY-15);
+			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
 
-			//robot.setX(robot.getX()-distanceX);
+			/**
+			path.setEndX((curX-distanceX-15));
+			path.setEndY((curY-15));
+
+			path.setStartX((curX-distanceX-15));
+			path.setStartY((curY-15));
+			**/
+
+			//return;
+		}
+		mover.play();
+
+		System.out.print("-----------End Movement X------------\n");
+		//p.play();
+
+		//transition.setOnFinished(walkFrom(to) );
+		//movementY(robot,0,y, circle_start);
+
+	}
+
+
+	public void movementY(ImageView robot, int x, int y, Circle circle_start)
+	{
+
+
+		int distanceX = x * 50;
+		int distanceY = y * 50;
+
+		int curX = (int) (robot.getX()+15);
+		int curY= (int) (robot.getY()+15);
+		System.out.println("\n------Movement Y -----");
+		System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
+		System.out.println("curX "+curX+" |  curY "+curY);          //Koordinaten  sind Absolut (Fenster)
+
+		PathTransition mover = new PathTransition();
+		Line pathAnimation = new Line();
+		//mover.setOnFinished(e -> finish(robot,path,pane circle_start));
+		pathAnimation.setStartX(curX);
+		pathAnimation.setStartY(curY);
+
+
+
+		if (distanceY >0)  //Down
+		{
+			rotate(robot,180);
+
+			System.out.println("\nMoving Down "+y+"x   Distance is: "+distanceY);
+
+			pathAnimation.setEndX(robot.getX()+15);
+			pathAnimation.setEndY(curY+distanceY);
+			mover.setDuration(Duration.millis(1500));
+			mover.setPath(pathAnimation);
+			mover.setNode(robot);
+			mover.play();
+
+			robot.setY((curY+distanceY-15));
+			robot.setX(curX-15);
 			//info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
+			/**
+			path.setEndX((curX-15));
+			path.setEndY((curY+distanceY-15));
+
+			path.setStartX((curX-15));
+			path.setStartY((curY+distanceY-15));
+			**/
+
+			//return;
+		}else if (distanceY < 0)  //Up
+		{
+			rotate(robot,0);
+			distanceY = Math.abs(distanceY);
+			System.out.println("Moving Up "+y+"x   Distance is: -"+distanceY);
+			//info_text.setText("Moving "+y+"x   Distance is: "+distanceY);
+
+			pathAnimation.setStartX(robot.getX()+15);
+			pathAnimation.setStartY(robot.getY()+15);
+
+			pathAnimation.setEndX(robot.getX()+15);
+			pathAnimation.setEndY(curY-distanceY);
+			mover.setDuration(Duration.millis(1500));
+			mover.setPath(pathAnimation);
+			mover.setNode(robot);
+			mover.play();
+
+			robot.setY((curY-distanceY-15));
+			robot.setX(curX-15);
+
+			/**
+			path.setEndX((curX-15));
+			path.setEndY((curY-distanceY-15));
+
+			path.setStartX((curX-15));
+			path.setStartY((curY-distanceY-15));
+			**/
+			//return;
+		}
+
+		System.out.print("-----------End Movement Y-----------------\n");
+
+	}
+
+
+
+
+	public void movement(ImageView robot, int x, int y, Circle circle_start)
+	{
+
+		System.out.println("In Movement funtion\n");
+
+		int distanceX = x * 50;
+		int distanceY = y * 50;
+
+		int curX = (int) (robot.getX()+15);
+		int curY= (int) (robot.getY()+15);
+
+		System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
+		System.out.println("curX "+curX+" |  curY "+curY);
+		System.out.println("\n");
+		PathTransition moverX = new PathTransition();
+		PathTransition moverY = new PathTransition();
+		moverX.setOnFinished(e -> moverY.play());
+		Line pathAnimation = new Line();
+
+		SequentialTransition seqT = new SequentialTransition();
+
+		pathAnimation.setStartX(robot.getX()+15);
+		pathAnimation.setStartY(robot.getY()+15);
+
+
+
+
+		if (distanceX>0)    //right
+		{
+			rotate(robot,90);
+
+			System.out.println("Moving Right "+x+"x   Distance is: "+distanceX);
+			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
+			System.out.println("Moving to X "+(curX+distanceX));
+
+			pathAnimation.setEndX(curX+distanceX);
+			pathAnimation.setEndY(robot.getY()+15);
+			moverX.setDuration(Duration.millis(250));
+			moverX.setPath(pathAnimation);
+			moverX.setNode(robot);
+			//mover.play();
+			//seqT.play();
+
+			robot.setX((curX+distanceX-15));
+			robot.setY(curY-15);
+
+			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
+
+			moverX.play();
+
+
+		}else if (distanceX<0) //Left
+		{
+			distanceX= Math.abs(distanceX);
+
+			rotate(robot,-90);
+
+			//pathAnimation.setStartX(robot.getX()+15);
+			//pathAnimation.setStartY(robot.getY()+15);
+
+
+			pathAnimation.setEndX(curX-distanceX);
+			pathAnimation.setEndY(robot.getY()+15);
+			moverX.setDuration(Duration.millis(250));
+			moverX.setPath(pathAnimation);
+			moverX.setNode(robot);
+			//mover.play();
+			//seqT.play();
+
+			System.out.println("Moving Left "+x+"x   Distance is: -"+distanceX);
+			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
+
+			robot.setX((curX-distanceX-15));
+			robot.setY(curY-15);
+			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
 
 		}
 
@@ -353,35 +596,61 @@ public class grid_layout extends Application
 		{
 			rotate(robot,180);
 
-			System.out.println("Moving Up "+y+"x   Distance is: "+distanceY);
-			//info_text.setText("Moving "+y+"x   Distance is: "+distanceY);
-			//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
+			System.out.println("\nMoving Down "+y+"x   Distance is: "+distanceY);
+			pathAnimation.setEndX(robot.getX()+15);
+			pathAnimation.setEndY(curY+distanceY);
+			moverY.setDuration(Duration.millis(250));
+			moverY.setPath(pathAnimation);
+			moverY.setNode(robot);
+			//mover.play();
+			//seqT.play();
 
-			PathTransition pt = new PathTransition(Duration.millis(2500), new Line(robot.getX()+15, robot.getY()+15,  robot.getX()+15, robot.getY()+distanceY+15), robot);
-			//pt.setCycleCount(Timeline.INDEFINITE);
-			pt.play(); // Start animation
-
-			//robot.setY(robot.getY()+distanceY);
+			robot.setY((curY+distanceY-15));
+			robot.setX(curX-15);
 			//info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-
-		}else if (distanceY <0)  //Up
+			//return;
+		}else if (distanceY < 0)  //Up
 		{
 			rotate(robot,0);
 			distanceY = Math.abs(distanceY);
 			System.out.println("Moving Up "+y+"x   Distance is: -"+distanceY);
 			//info_text.setText("Moving "+y+"x   Distance is: "+distanceY);
 
-			PathTransition pt = new PathTransition(Duration.millis(2500), new Line(robot.getX()+15, robot.getY()+15,  robot.getX()+15, robot.getY()-distanceY+15), robot);
-			//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			//pt.setCycleCount(Timeline.INDEFINITE);
-			pt.play(); // Start animation
+			pathAnimation.setStartX(robot.getX()+15);
+			pathAnimation.setStartY(robot.getY()+15);
 
-			//robot.setY(robot.getY()-distanceY);
-			//info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
+			pathAnimation.setEndX(robot.getX()+15);
+			pathAnimation.setEndY(curY-distanceY);
+			moverY.setDuration(Duration.millis(250));
+			moverY.setPath(pathAnimation);
+			moverY.setNode(robot);
+			//mover.play();
 
+
+
+			robot.setY((curY-distanceY-15));
+			robot.setX(curX-15);
 		}
+		//moverY.play();
+		moverX.play();
+		//seqT.getChildren().addAll(moverX,moverY);
+		//seqT.setCycleCount(1);
+		//seqT.setAutoReverse(false);
 
+		System.out.println("End Movement Y\n");
+		System.out.println("End Movement");
+		//seqT.play();
+
+		/**
+		mover.setDuration(Duration.millis(200500));
+		mover.setPath(path);
+		mover.setNode(robot);
+		mover.play();
+		**/
+		//PathTransition pt = new PathTransition(Duration.millis(2500), new Line(robot.getX()+15, robot.getY()+15,  robot.getX()+15, robot.getY()+distanceY),robot );
 	}
+
+
 	void rotate(ImageView robot,int steps)
 	{
 
@@ -406,24 +675,73 @@ public class grid_layout extends Application
 		return rand;
 	}
 
-
-
-	void searchPath(ImageView robot, int mov, Pane pane, Circle circle_start, int trys, int ry, int rx)
+	void finish(ImageView robot, Line path ,Pane pane, Circle circle_start)
 	{
-		Line path = new Line();
-		pane.getChildren().add(path);
+		System.out.println("\n---------End Methode------------");
+		Line path1 = new Line();
+		Line path2 = new Line();
+		path1.setStroke(Color.BLUE);
+		path2.setStroke(Color.BLUE);
+		pane.getChildren().addAll(path1,path2);
+		int distanceX = xbuffer * 50;
+		int distanceY = ybuffer * 50;
+		System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
+		int startx = (int) circle_start.getCenterX();
+		int starty = (int) circle_start.getCenterY();
+		System.out.println(startx+" "+starty);
+
+		path1.setStartX(startx);
+		path1.setStartY(starty);
+		System.out.println("Path Start: X"+path1.getStartX()+" Y "+path1.getStartY());
+
+		path1.setEndX(startx+distanceX);
+		path1.setEndY(path1.getStartY());
+		System.out.println("Path End: X"+path1.getEndX()+" Y "+path1.getEndY());
+
+		//path.setEndY(starty);
+		path2.setStartX(path1.getEndX());
+		path2.setStartY(path1.getEndY());
+
+		System.out.println("Path Start: X"+path2.getStartX()+" Y "+path2.getStartY());
+		path2.setEndX(path2.getStartX());
+		path2.setEndY(starty+distanceY);
+		System.out.println("Path End: X"+path2.getEndX()+" Y "+path2.getEndY());
+		//path.setEndY(starty);
+		//path.setStartX(startx+distanceX);
+
+		System.out.println(((startx+distanceX)));
+		System.out.println(((starty+distanceY)));
+
+
+		//path.setEndX((rx*50));
+		//path.setEndY((ry*50));
+
+
+		//System.out.println("Path Start: X"+path.getStartX()+" Y "+path.getStartY());
+		//System.out.println("Path End: X"+path.getEndX()+" Y "+path.getEndY());
+	}
+
+
+	void searchPath(ImageView robot, int mov, Line path, Pane pane, Circle circle_start, int trys, int ry, int rx)
+	{
+
+
 		if (trys == 0)
 		{
 			System.out.println("Line Cleard");
-			pane.getChildren().remove(path);
+			//pane.getChildren().remove(path);
 
 		}
 
 		//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-		System.out.println("\n----------------------------------------------------------");
-		System.out.println("\nTrys: "+trys);
+		System.out.println("\n-------------------Try: "+trys+"--------------------------------");
+		//System.out.println("\nTrys: "+trys);
 		if (trys>=500) return;
 
+
+
+		array[ry][rx]= 'R';
+		print_array();
 
 		boolean exit = false;
 		int dist = distance[ry][rx];
@@ -433,55 +751,99 @@ public class grid_layout extends Application
 		int distright= Integer.MAX_VALUE;
 
 		//Robot Koordinaten
-		int rx1 = (int) robot.getX()+15;
-		int ry1= (int) robot.getY()+15;
 
-		rx1= (rx1/50)-1;
-		ry1= (ry1/50)-1;
+		//int rx1 = (int) robot.getX()+15;
+		//int ry1= (int) robot.getY()+15;
+		//System.out.print("Robo Current Field rx1 & ry1- -> ");
+		//System.out.println("X: "+rx1+" Y: "+ry1);
+		//rx1= (rx1/50)-1;
+		//ry1= (ry1/50)-1;
+		//System.out.print("Robo Current Array --> ");
+		//System.out.println("X: "+rx1+" Y: "+ry1);
 
+		System.out.println(dist);
+		System.out.print("Robo Current Field  --> ");
+		System.out.println("X: "+(rx*50)+" Y: "+(ry*50));
+		System.out.print("Robo Current Array Field  --> ");
+		System.out.println("X: "+rx+" Y: "+ry);
 
 		//System.out.println("RX: "+rx+" Calc :"+rx*50+35 );
 		//System.out.println("RY: "+ry+" Calc: "+ry*50+35 );
 
-		path.setStartX(robot.getX()+15);
-		path.setStartY(robot.getY()+15);
-		path.setStroke(Color.DARKBLUE);
+		//path.setEndX((rx*50));
+		//path.setEndY((ry*50));
 
-		robot.setX(rx*50+35);
-		robot.setY(ry*50+35);
+		//path.setStartX((rx*50));
+		//path.setStartY((ry*50));
+		System.out.print("Path Start: X"+path.getStartX()+" Y "+path.getStartY()+"  ");
+		System.out.println("Path End: X"+path.getEndX()+" Y "+path.getEndY());
 
-		path.setEndX(robot.getX()+15);
-		path.setEndY(robot.getY()+15);
-		array[ry][rx]= 'R';
+
+
 
 
 		if (dist <= 0)
 		{
+			finish(robot,path,pane,circle_start);
 			System.out.println("\n---------Finish------------");
+			System.out.println("Trys: "+trys);
+			System.out.println("NO SEARCH BEHINDE THIS POINT\n");
+			System.out.println("Start Movement");
 
 			System.out.println("X Buff: "+xbuffer);
 			System.out.println("Y Buff: "+ybuffer);
-			//movement(robot,xbuffer,0, circle_start);
-			robot.setX(rx1*50+35);
-			//movement(robot,0,ybuffer, circle_start);
-			robot.setX(rx1*50+35);
 
-			//movement(robot,xbuffer-1,0, circle_start);
-			//movement(robot,0,ybuffer-1, circle_start);
-			
+
+			//System.out.println("Before Moevement Path Start: X"+path.getStartX()+" Y "+path.getStartY());
+			//System.out.println("Before Movement Path End: X"+path.getEndX()+" Y "+path.getEndY());
+			movementX(robot,xbuffer,ybuffer, circle_start);
+
+			//path.setEndX(robot.getX()+15);
+			//path.setEndY(robot.getY()+15);
+
+			//System.out.println("After Moevement Path Start: X"+path.getStartX()+" Y "+path.getStartY());
+			//System.out.println("After Movement Path End: X"+path.getEndX()+" Y "+path.getEndY());
+			//System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
+
+
+
+			//robot.setX((rx*50+35));
+			//robot.setY((ry*50+35));
+
+			//System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
+
 			//robot.setX(rx1*50+35);
 			//robot.setY(ry1*50+35);
 
 
 			//System.out.println("Movements: "+mov);
-			System.out.println("Trys: "+trys);
+
 			//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			System.out.println("NO SEARCH BEHINDE THIS POINT\n");
+
+
 			exit=true;
 		}
-		
+
+		array[ry][rx]= 'R';
+
+		System.out.print("Path Start: X"+path.getStartX()+" Y "+path.getStartY()+"  ");
+		System.out.println("Path End: X"+path.getEndX()+" Y "+path.getEndY());
 		if(exit) return;
-		
+
+
+
+		//System.out.println("Playfield X: "+(rx*50)+" Y: "+(ry*50));
+		//System.out.println("X: "+robot.getX()+" Y: "+robot.getY());
+
+		//path.setEndX((rx*50));
+		//path.setEndY((ry*50));
+
+
+
+
+		//System.out.println("Last Moevement Path Start: X"+path.getStartX()+" Y "+path.getStartY());
+		//System.out.println("Last Movement Path End: X"+path.getEndX()+" Y "+path.getEndY());
+
 
 		//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 
@@ -489,9 +851,7 @@ public class grid_layout extends Application
 		//System.out.println(rx1 +" "+ry1);
 
 		System.out.println("\n");
-		print_array();
-
-
+		//print_array();
 
 
 		System.out.println("Distance Current Field "+dist);
@@ -504,10 +864,12 @@ public class grid_layout extends Application
 			System.out.println("Distance Left Field " + distleft);
 			if (distleft==0)
 			{
+				/**
 				System.out.println("Fastlane Left");
 				array[ry][rx]= 'O';
 				xbuffer=xbuffer-1;
 				searchPath(robot,mov+1, pane, circle_start, trys+1,ry, rx-1);
+				 **/
 				}
 
 		}
@@ -517,30 +879,28 @@ public class grid_layout extends Application
 			System.out.println("Distance Right Field " + distright);
 			if (distright==0)
 			{
+				/**
 				System.out.println("Fastlane right");
 				array[ry][rx]= 'O';
 				xbuffer=xbuffer+1;
 				searchPath(robot,mov+1, pane, circle_start, trys+1,ry, rx+1);
-
+				**/
 			}
-
-
 
 		}
 		if (ry < 8)
 		{
-
 			distbottom = distance[ry + 1][rx];
 			System.out.println("Distance Bottom Field " + distbottom);
 			if (distbottom==0)
 			{
+				/**
 				System.out.println("Fastlane Down");
 				array[ry][rx]= 'O';
 				ybuffer=ybuffer+1;
 				searchPath(robot,mov+1, pane, circle_start, trys+1,ry+1, rx);
+				 **/
 			}
-
-
 
 		}
 		if (ry > 0)
@@ -550,69 +910,87 @@ public class grid_layout extends Application
 			System.out.println("Distance Top Field " + disttop);
 			if (disttop==0)
 			{
+				/**
 				System.out.println("Fastlane Up");
 				array[ry][rx]= 'O';
 				ybuffer=ybuffer-1;
 				searchPath(robot,mov+1, pane, circle_start, trys+1,ry-1, rx);
+				 **/
 			}
-
 
 		}
 
 
+		int leftORright = Integer.compare(distright,distleft);
+		int leftORbottom = Integer.compare(distbottom,distleft);
+		int leftORtop = Integer.compare(disttop,distleft);
+		int topORbottom = Integer.compare(distbottom,disttop);
+		int bottomORtop = Integer.compare(disttop,distbottom);
+		int rightORtop = Integer.compare(disttop,distright);
+		int rightORbottom = Integer.compare(distbottom,distright);
+
+
+		System.out.println("Left&Right "+ leftORright);        // -1 Right
+		System.out.println("Left&Bottom "+ leftORbottom);       //-1 Bottom
+		System.out.println("Left&Top "+ leftORtop);             //-1 top
+		System.out.println("Right&Top "+ rightORtop);           //-1 top
+		System.out.println("Right&Bottom "+ rightORbottom);     //-1 bottom
+		System.out.println("Top&Bottom "+ topORbottom);         //-1 bottom
+		System.out.println("Bottom&Top "+ bottomORtop);         //-1 Up
 
 
 
-		int leftorright = Integer.compare(distright,distleft);
-		int toporbottom = Integer.compare(disttop,distbottom);
-		System.out.println("Left&Right "+ leftorright);
-		System.out.println("Top&Bottom "+ toporbottom);
+		//Value Net
+		System.out.println("\nDIRECTION WEIGHT");
+		System.out.println("Value Left: "+(leftORbottom+leftORright+leftORtop));
+		System.out.println("Value Right: "+(rightORbottom+rightORtop+leftORright));
+		System.out.println("Value Top: "+(topORbottom));
+		//System.out.println("Value Top: "+(topORbottom+leftORtop+rightORtop));
+		//System.out.println("Value Bottom: "+(bottomORtop+leftORbottom+rightORbottom));
+		System.out.println("Value Bottom: "+(bottomORtop));
 
-		int direction = Integer.compare(leftorright,toporbottom);
 
-		System.out.println("Direction: "+direction);
+		int valueleft = (leftORbottom+leftORright+leftORtop);
+		int valueright = (rightORbottom+rightORtop+leftORright);
+		//int valuetop = topORbottom;
+		//int valuebottom = bottomORtop;
 
-		if (leftorright<0)
+
+		int direction = Integer.compare(leftORright,topORbottom);
+
+		//System.out.println("Direction: "+direction);
+
+		if (valueleft>0)
 		{
-			System.out.println("Going right");
-			array[ry][rx]= 'O';
-			xbuffer=xbuffer+1;
-			searchPath(robot,mov+1, pane, circle_start, trys+1,ry, rx+1);
-			//searchPath(robot, pane, trys+1,ry+1, rx);
-		}else if (leftorright>0)
-		{
+
 			System.out.println("Going Left");
 			array[ry][rx]= 'O';
 			xbuffer=xbuffer-1;
-			searchPath(robot,mov+1, pane, circle_start, trys+1,ry, rx-1);
-			//searchPath(robot, pane, trys+1,ry-1, rx);
-		}else if (toporbottom<0)
+			searchPath(robot,mov+1, path, pane, circle_start, trys+1,ry, rx-1);
+
+		}else if (valueright>0)
+		{
+
+			System.out.println("Going right");
+			array[ry][rx]= 'O';
+			xbuffer=xbuffer+1;
+			searchPath(robot,mov+1, path, pane, circle_start, trys+1,ry, rx+1);
+
+		}else if (topORbottom>0)
 		{
 			System.out.println("Going Up");
 			array[ry][rx]= 'O';
 			ybuffer=ybuffer-1;
-			searchPath(robot,mov+1, pane, circle_start, trys+1,ry-1, rx);
-			//searchPath(robot, pane, trys+1,ry, rx-1);
-		}else if (toporbottom>0)
+			searchPath(robot,mov+1, path, pane, circle_start, trys+1,ry-1, rx);
+		}else if (bottomORtop>0)
 		{
+
 			System.out.println("Going Down");
 			array[ry][rx]= 'O';
 			ybuffer=ybuffer+1;
-			searchPath(robot,mov+1, pane, circle_start, trys+1,ry+1, rx);
-			//searchPath(robot, pane, trys+1,ry, rx+1);
+			searchPath(robot,mov+1, path, pane, circle_start, trys+1,ry+1, rx);
 		}
-		//03:39 pm    AHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
-
-	}
-
-	void check(int A,int B)
-	{
-		if (A<B)
-		{
-
-
-		}
 
 
 	}
@@ -641,9 +1019,9 @@ public class grid_layout extends Application
 		cx= (cx/50)-1;
 		cy= (cy/50)-1;
 
-		System.out.println("CX: "+cx);
-		System.out.println("CY: "+cy);
-		System.out.println("RX: "+rx);
+		System.out.print("CX: "+cx+" ");
+		System.out.print("CY: "+cy+" | ");
+		System.out.print("RX: "+rx+" ");
 		System.out.println("RY: "+ry);
 
 		array[cy][cx]= 'G';
@@ -651,7 +1029,7 @@ public class grid_layout extends Application
 
 		//System.out.println("   1 2 3 4 5 6 7 8");
 
-		print_array();
+		//print_array();
 
 
 	}
@@ -738,5 +1116,19 @@ public class grid_layout extends Application
 
 
 	}
+
+	public grid_layout setRobotXABSOLUTE(int robotXABSOLUTE)
+	{
+		return this;
+	}
+
+	public grid_layout setRobotYABSOLUTE(int robotYABSOLUTE)
+	{
+		return this;
+	}
+
+
+
+
 
 }
