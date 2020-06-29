@@ -1,6 +1,6 @@
 import javafx.animation.PathTransition;
-import javafx.animation.SequentialTransition;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -36,24 +37,27 @@ public class Warehouse_MidTerm extends Application
 	public int ybuffer;
 	public int movmentX;
 	public int movmentY;
-	 int MinX =50;
-	 int MinY =50;
-	 int MaxX =450;
-	 int MaxY =450;
+	int MinX = 50;
+	int MinY = 50;
+	int MaxX = 450;
+	int MaxY = 450;
 	int[][] distance;
+
+	Polyline poly = new Polyline();
+	ObservableList<Double> list = poly.getPoints();
 
 	@Override
 	public void start(Stage stage)
 	{
-
+		
 		// load the image
 		Image image = new Image("file:///C:/Users/micha/IdeaProjects/Warehouse_2/src/triangle-32.gif");
 		ImageView robot = new ImageView();
 		robot.setImage(image);
 		robot.setCache(true);
 		robot.setFitHeight(30);
-		robot.setX(250-15);
-		robot.setY(250-15);
+		//robot.setX(250-15);
+		//robot.setY(250-15);
 		robot.setPreserveRatio(true);
 
 		path.setStroke(Color.DARKBLUE);
@@ -68,35 +72,37 @@ public class Warehouse_MidTerm extends Application
 		circle.setFill(Color.RED);
 		circle_start.setFill(Color.BLACK);
 		circle_start.setRadius(5);
-		circle_start.setCenterX(robot.getX()+15);
-		circle_start.setCenterY(robot.getY()+15);
+		circle_start.setVisible(false);
+		//circle_start.setCenterX(robot.getX()+15);
+		//circle_start.setCenterY(robot.getY()+15);
 
 
 		Pane pane = new Pane();
-		double HORIZ=500;
-		double VERTI =500;
+		double HORIZ = 500;
+		double VERTI = 500;
 		//with = breite
 
 		HBox hBox1 = new HBox(5);
 		hBox1.setSpacing(80);
+		hBox1.setAlignment(Pos.CENTER);
 
 		HBox hBox2 = new HBox();
 		hBox2.setSpacing(33);
 
 		VBox vBox = new VBox();
-		vBox.setSpacing(20);
+		vBox.setSpacing(15);
 		vBox.setAlignment(Pos.CENTER);
-		
+		vBox.setFillWidth(false);
+
 		VBox vBox2 = new VBox();
 		vBox2.setSpacing(33);
-		
+
 		BorderPane border = new BorderPane();
 		border.setBottom(hBox1);
 		border.setCenter(pane);
 		border.setRight(vBox);
 		border.setTop(hBox2);
 		border.setLeft(vBox2);
-
 
 
 		// Create a button
@@ -106,12 +112,20 @@ public class Warehouse_MidTerm extends Application
 		Button bt_down = new Button("Down");
 		Button bt_turnR = new Button("Turn Right");
 		Button bt_turnL = new Button("Turn Left");
-		Button bt_reset = new Button("Reset");
+		Button bt_reset = new Button("Set Robot Position ");
 		Button bt_movement = new Button("Move ");
 		Button bt_circle_ran = new Button("Circle Random ");
 		Button bt_Find_path = new Button("Find path ");
 		TextField x_coor = new TextField("X_Coordinaten");
 		TextField y_coor = new TextField("Y_Coordinaten");
+		TextField x_coorField = new TextField("X_Field");
+		TextField y_coorField = new TextField("Y_Field");
+
+		bt_reset.setMaxWidth(20);
+
+		bt_Find_path.setDisable(true);
+		robot.setVisible(false);
+
 		TextField move_count = new TextField("1");
 		Text info_text = new Text();
 		x_coor.setPrefWidth(80);
@@ -122,12 +136,12 @@ public class Warehouse_MidTerm extends Application
 		y_coor.setText("200");
 		//x_coor.setText(String.valueOf((int) robot.getX()+15));
 		//y_coor.setText(String.valueOf((int) robot.getY()+15));
-		info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
+		info_text.setText("X: " + ((int) robot.getX() + 15) + " Y: " + ((int) robot.getY() + 15));
 
 
+		//Todo Feldgröße einstelbar
 
-
-		for (int i = 50; i <= 450 ; i+=50)
+		for (int i = 50; i <= 450; i += 50)
 		{
 			Line line1 = new Line(i, 50, i, 450);
 			//line1.setStroke(Color.BLUE);
@@ -226,38 +240,42 @@ public class Warehouse_MidTerm extends Application
 
 		bt_reset.setOnAction(e ->
 		{
-			xbuffer=0;
-			ybuffer=0;
+			xbuffer = 0;
+			ybuffer = 0;
 
 			//int x = Integer.parseInt(x_coor.getText());
-			robot.setX((Integer.parseInt(x_coor.getText()))+35);
-			robot.setY((Integer.parseInt(y_coor.getText()))+35);
+			robot.setX((Integer.parseInt(x_coor.getText())) + 35);
+			robot.setY((Integer.parseInt(y_coor.getText())) + 35);
+			circle_start.setCenterX(robot.getX() + 15);
+			circle_start.setCenterY(robot.getY() + 15);
+
 			//robot.setX(250-15);
 			//robot.setY(250-15);
 			robot.setRotate(0);
-			info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
+			bt_Find_path.setDisable(false);
+			circle_start.setVisible(true);
+			robot.setVisible(true);
+			info_text.setText("X: " + ((int) robot.getX() + 15) + " Y: " + ((int) robot.getY() + 15));
 
 		});
 
 		bt_movement.setOnAction(e ->
 		{
-			//int y = Integer.parseInt(move_count.getText());
-			//int x=0;
-			movement(robot,1,2, circle_start);
-			//movementX(robot,1,2,circle_start);
-			//x_coor.setText(String.valueOf(robot.getX()+15));
-			//y_coor.setText(String.valueOf(robot.getY()));
+
+
+			//movement(robot,1,2, circle_start);
 
 		});
 
 		bt_circle_ran.setOnAction(e ->
 		{
-			circle.setCenterX(ran());
-			circle.setCenterY(ran());
+			//circle.setCenterX(ran());
+			//circle.setCenterY(ran());
 
 
-			//circle.setCenterX(250);
-			//circle.setCenterY(50);
+			circle.setCenterX(150);
+			circle.setCenterY(50);
+
 
 		});
 
@@ -272,32 +290,32 @@ public class Warehouse_MidTerm extends Application
 			findDistance(array);
 			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
 			searchPath(robot,0,path, pane,circle_start, 0,(int) (robot.getY()+15)/50-1,(int) (robot.getX()+15)/50-1);
-
 			//find_path(circle,robot);
+
+
 		});
 
 
 		pane.setOnMousePressed((new EventHandler<MouseEvent>()
-				{
+		{
+			public void handle(MouseEvent event)
+			{
+				String msg = "(x: " + event.getX() + " ,y: " + event.getY() + ") -- " + "(sceneX: " + event.getSceneX() + ", sceneY: " + event.getSceneY();
+				info_text.setText(msg);
 
-					public void handle(MouseEvent event)
-					{
-						String msg = "(x: " + event.getX() + " ,y: " + event.getY() + ") -- " + "(sceneX: " + event.getSceneX() + ", sceneY: " + event.getSceneY();
-						info_text.setText(msg);
-
-					}
-				}));
+			}
+		}));
 
 
-		pane.getChildren().addAll(circle,circle_start,robot,path);
-		vBox.getChildren().addAll(x_coor,y_coor,bt_left,bt_right,bt_down,bt_up,bt_reset,bt_circle_ran);
-		hBox1.getChildren().addAll(move_count,bt_movement,bt_Find_path);
+		pane.getChildren().addAll(circle, circle_start, robot, path, poly);
+		vBox.getChildren().addAll(x_coor, y_coor, bt_left, bt_right, bt_down, bt_up, bt_reset, bt_circle_ran);
+		hBox1.getChildren().addAll(move_count, bt_movement, bt_Find_path);
 		hBox2.getChildren().addAll(info_text);
 		//
 
 
 		//Scene scene = new Scene(pane,HORIZ,VERTI); // horizon , vertik
-		Scene scene2 = new Scene(border,HORIZ+150,VERTI+100); // horizon , vertik
+		Scene scene2 = new Scene(border, HORIZ + 150, VERTI + 100); // horizon , vertik
 		stage.setTitle("Warehouse ");
 		stage.setScene(scene2);
 		stage.show();
@@ -309,11 +327,6 @@ public class Warehouse_MidTerm extends Application
 
 
 	}
-
-
-
-
-
 
 
 	//public void movement(ImageView robot, int x,int y, Text info_text)
@@ -339,28 +352,28 @@ public class Warehouse_MidTerm extends Application
 		pathAnimation.setStartY(robot.getY()+15);
 
 
-
 		if (distanceX>0)    //right
 		{
-			rotate(robot,90);
+			rotate(robot, 90);
 
-			System.out.println("Moving Right "+x+"x   Distance is: "+distanceX);
+			System.out.println("Moving Right " + x + "x   Distance is: " + distanceX);
 			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
-			System.out.println("Moving to X "+(curX+distanceX));
+			System.out.println("Moving to X " + (curX + distanceX));
 			mover.setOnFinished(e -> movementY(robot, x, y, circle_start));
-			pathAnimation.setEndX(curX+distanceX);
-			pathAnimation.setEndY(robot.getY()+15);
-			mover.setDuration(Duration.millis(1500));
+			pathAnimation.setEndX(curX + distanceX);
+			pathAnimation.setEndY(robot.getY() + 15);
+			mover.setDuration(Duration.millis(2300));
 			mover.setPath(pathAnimation);
+			//mover.setPath(poly);
 			mover.setNode(robot);
 			mover.play();
-			robot.setX((curX+distanceX-15));
-			robot.setY(curY-15);
-			curX = (int) (robot.getX()+15);
+			robot.setX((curX + distanceX - 15));
+			robot.setY(curY - 15);
+			curX = (int) (robot.getX() + 15);
 			//curY= (int) (robot.getY()+15);
 
-			System.out.print("CurX: "+curX+"  ");
-			System.out.println("CurY: "+curY);
+			System.out.print("CurX: " + curX + "  ");
+			System.out.println("CurY: " + curY);
 			//System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
 
 			/**
@@ -375,22 +388,22 @@ public class Warehouse_MidTerm extends Application
 		{
 			//distanceX= Math.abs(distanceX);
 
-			rotate(robot,-90);
+			rotate(robot, -90);
 
-			pathAnimation.setEndX(curX+distanceX);
-			pathAnimation.setEndY(robot.getY()+15);
-			mover.setDuration(Duration.millis(1500));
+			pathAnimation.setEndX(curX + distanceX);
+			pathAnimation.setEndY(robot.getY() + 15);
+			mover.setDuration(Duration.millis(2300));
 			mover.setPath(pathAnimation);
+			//mover.setPath(poly);
 			mover.setNode(robot);
 			mover.setOnFinished(e -> movementY(robot, x, y, circle_start));
 			mover.play();
 
-			System.out.println("Moving Left "+x+"x   Distance is: "+distanceX);
+			System.out.println("Moving Left " + x + "x   Distance is: " + distanceX);
 			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
 
 
-
-			robot.setX((curX+distanceX-15));
+			robot.setX((curX + distanceX - 15));
 			//robot.setY(curY-15);
 
 			curX = (int) (robot.getX()+15);
@@ -442,24 +455,25 @@ public class Warehouse_MidTerm extends Application
 
 		if (distanceY >0)  //Down
 		{
-			rotate(robot,180);
+			rotate(robot, 180);
 
-			System.out.println("\nMoving Down "+y+"x   Distance is: "+distanceY);
+			System.out.println("\nMoving Down " + y + "x   Distance is: " + distanceY);
 
-			pathAnimation.setEndX(robot.getX()+15);
-			pathAnimation.setEndY(curY+distanceY);
-			mover.setDuration(Duration.millis(1500));
+			pathAnimation.setEndX(robot.getX() + 15);
+			pathAnimation.setEndY(curY + distanceY);
+			mover.setDuration(Duration.millis(2300));
 			mover.setPath(pathAnimation);
+			//mover.setPath(poly);
 			mover.setNode(robot);
 			mover.play();
 
-			robot.setY((curY+distanceY-15));
+			robot.setY((curY + distanceY - 15));
 			//robot.setX(curX-15);
 
-			curX = (int) (robot.getX()+15);
-			curY= (int) (robot.getY()+15);
+			curX = (int) (robot.getX() + 15);
+			curY = (int) (robot.getY() + 15);
 
-			System.out.print("CurX: "+curX+"  ");
+			System.out.print("CurX: " + curX + "  ");
 			System.out.println("CurY: "+curY);
 
 
@@ -475,28 +489,29 @@ public class Warehouse_MidTerm extends Application
 			//return;
 		}else if (distanceY < 0)  //Up
 		{
-			rotate(robot,0);
+			rotate(robot, 0);
 			distanceY = Math.abs(distanceY);
-			System.out.println("Moving Up "+y+"x   Distance is: -"+distanceY);
+			System.out.println("Moving Up " + y + "x   Distance is: -" + distanceY);
 			//info_text.setText("Moving "+y+"x   Distance is: "+distanceY);
 
-			pathAnimation.setStartX(robot.getX()+15);
-			pathAnimation.setStartY(robot.getY()+15);
+			pathAnimation.setStartX(robot.getX() + 15);
+			pathAnimation.setStartY(robot.getY() + 15);
 
-			pathAnimation.setEndX(robot.getX()+15);
-			pathAnimation.setEndY(curY-distanceY);
-			mover.setDuration(Duration.millis(1500));
+			pathAnimation.setEndX(robot.getX() + 15);
+			pathAnimation.setEndY(curY - distanceY);
+			mover.setDuration(Duration.millis(2300));
 			mover.setPath(pathAnimation);
+			//mover.setPath(poly);
 			mover.setNode(robot);
 			mover.play();
-			robot.setY((curY-distanceY-15));
+			robot.setY((curY - distanceY - 15));
 			//robot.setX(curX-15);
 
 
-			curX = (int) (robot.getX()+15);
-			curY= (int) (robot.getY()+15);
+			curX = (int) (robot.getX() + 15);
+			curY = (int) (robot.getY() + 15);
 
-			System.out.print("CurX: "+curX+"  ");
+			System.out.print("CurX: " + curX + "  ");
 			System.out.println("CurY: "+curY);
 
 			/**
@@ -515,145 +530,6 @@ public class Warehouse_MidTerm extends Application
 
 
 
-
-	public void movement(ImageView robot, int x, int y, Circle circle_start)
-	{
-
-		System.out.println("In Movement funtion\n");
-
-		int distanceX = x * 50;
-		int distanceY = y * 50;
-
-		int curX = (int) (robot.getX()+15);
-		int curY= (int) (robot.getY()+15);
-
-		System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
-		System.out.println("curX "+curX+" |  curY "+curY);
-		System.out.println("\n");
-		PathTransition moverX = new PathTransition();
-		PathTransition moverY = new PathTransition();
-		moverX.setOnFinished(e -> moverY.play());
-		Line pathAnimation = new Line();
-
-		SequentialTransition seqT = new SequentialTransition();
-
-		pathAnimation.setStartX(robot.getX()+15);
-		pathAnimation.setStartY(robot.getY()+15);
-
-
-
-
-		if (distanceX>0)    //right
-		{
-			rotate(robot,90);
-
-			System.out.println("Moving Right "+x+"x   Distance is: "+distanceX);
-			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
-			System.out.println("Moving to X "+(curX+distanceX));
-
-			pathAnimation.setEndX(curX+distanceX);
-			pathAnimation.setEndY(robot.getY()+15);
-			moverX.setDuration(Duration.millis(250));
-			moverX.setPath(pathAnimation);
-			moverX.setNode(robot);
-			//mover.play();
-			//seqT.play();
-
-			robot.setX((curX+distanceX-15));
-			robot.setY(curY-15);
-
-			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
-
-			moverX.play();
-
-
-		}else if (distanceX<0) //Left
-		{
-			distanceX= Math.abs(distanceX);
-
-			rotate(robot,-90);
-
-			//pathAnimation.setStartX(robot.getX()+15);
-			//pathAnimation.setStartY(robot.getY()+15);
-
-
-			pathAnimation.setEndX(curX-distanceX);
-			pathAnimation.setEndY(robot.getY()+15);
-			moverX.setDuration(Duration.millis(250));
-			moverX.setPath(pathAnimation);
-			moverX.setNode(robot);
-			//mover.play();
-			//seqT.play();
-
-			System.out.println("Moving Left "+x+"x   Distance is: -"+distanceX);
-			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
-
-			robot.setX((curX-distanceX-15));
-			robot.setY(curY-15);
-			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
-
-		}
-
-
-		if (distanceY >0)  //Down
-		{
-			rotate(robot,180);
-
-			System.out.println("\nMoving Down "+y+"x   Distance is: "+distanceY);
-			pathAnimation.setEndX(robot.getX()+15);
-			pathAnimation.setEndY(curY+distanceY);
-			moverY.setDuration(Duration.millis(250));
-			moverY.setPath(pathAnimation);
-			moverY.setNode(robot);
-			//mover.play();
-			//seqT.play();
-
-			robot.setY((curY+distanceY-15));
-			robot.setX(curX-15);
-			//info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			//return;
-		}else if (distanceY < 0)  //Up
-		{
-			rotate(robot,0);
-			distanceY = Math.abs(distanceY);
-			System.out.println("Moving Up "+y+"x   Distance is: -"+distanceY);
-			//info_text.setText("Moving "+y+"x   Distance is: "+distanceY);
-
-			pathAnimation.setStartX(robot.getX()+15);
-			pathAnimation.setStartY(robot.getY()+15);
-
-			pathAnimation.setEndX(robot.getX()+15);
-			pathAnimation.setEndY(curY-distanceY);
-			moverY.setDuration(Duration.millis(250));
-			moverY.setPath(pathAnimation);
-			moverY.setNode(robot);
-			//mover.play();
-
-
-
-			robot.setY((curY-distanceY-15));
-			robot.setX(curX-15);
-		}
-		//moverY.play();
-		moverX.play();
-		//seqT.getChildren().addAll(moverX,moverY);
-		//seqT.setCycleCount(1);
-		//seqT.setAutoReverse(false);
-
-		System.out.println("End Movement Y\n");
-		System.out.println("End Movement");
-		//seqT.play();
-
-		/**
-		mover.setDuration(Duration.millis(200500));
-		mover.setPath(path);
-		mover.setNode(robot);
-		mover.play();
-		**/
-		//PathTransition pt = new PathTransition(Duration.millis(2500), new Line(robot.getX()+15, robot.getY()+15,  robot.getX()+15, robot.getY()+distanceY),robot );
-	}
-
-
 	void rotate(ImageView robot,int steps)
 	{
 
@@ -670,12 +546,14 @@ public class Warehouse_MidTerm extends Application
 		//int result = r.nextInt(high-low) + low;
 
 
+
 		//int rand = (int) (Math.random() * 50)+25;
 		//double rand = (Math.random() * 500)+25;
 		//System.out.println(ran);
 		//System.out.println(rand);
 		return (r.nextInt(8) + 1) * 50;
 	}
+
 
 	void drawPath(ImageView robot, @NotNull Pane pane, @NotNull Circle circle_start)
 	{
@@ -705,29 +583,32 @@ public class Warehouse_MidTerm extends Application
 	void searchPath(ImageView robot, int mov, Line path, Pane pane, Circle circle_start, int trys, int ry, int rx)
 	{
 
+		//System.out.println("ADD TO LIST: rx "+(rx*50)+" ry"+(ry*50));
+
+		//list.add((double) (rx*50+50));
+		//list.add((double) (ry*50+50));
+
 
 		if (trys == 0)
 		{
 			System.out.println("Line Cleard");
 			//pane.getChildren().remove(path);
-
 		}
 
 		//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-		System.out.println("\n-------------------Try: "+trys+"--------------------------------");
+		System.out.println("\n-------------------Try: " + trys + "--------------------------------");
 		//System.out.println("\nTrys: "+trys);
-		if (trys>=500) return;
+		if (trys >= 1000) return;
 
 
-
-		array[ry][rx]= 'R';
+		array[ry][rx] = 'R';
 		print_array();
 
 		boolean exit = false;
 		int dist = distance[ry][rx];
 		int distleft = Integer.MAX_VALUE;
 		int distbottom = Integer.MAX_VALUE;
-		int disttop= Integer.MAX_VALUE;
+		int disttop = Integer.MAX_VALUE;
 		int distright= Integer.MAX_VALUE;
 
 		//Robot Koordinaten
@@ -756,23 +637,21 @@ public class Warehouse_MidTerm extends Application
 		//path.setStartX((rx*50));
 		//path.setStartY((ry*50));
 
-		System.out.print("Path Start: X"+path.getStartX()+" Y "+path.getStartY()+"  ");
-		System.out.println("Path End: X"+path.getEndX()+" Y "+path.getEndY());
-		array[ry][rx]= 'R';
+		System.out.print("Path Start: X" + path.getStartX() + " Y " + path.getStartY() + "  ");
+		System.out.println("Path End: X" + path.getEndX() + " Y " + path.getEndY());
+		array[ry][rx] = 'R';
 
 
-
-
-		if (dist <= 0)
+		if (dist == 0)
 		{
 
 			System.out.println("\n---------Finish------------");
-			System.out.println("Trys: "+trys);
+			System.out.println("Trys: " + trys);
 			System.out.println("NO SEARCH BEHINDE THIS POINT\n");
 			System.out.println("Start Movement");
-			drawPath(robot,pane,circle_start);
-			System.out.println("X Buff: "+xbuffer);
-			System.out.println("Y Buff: "+ybuffer);
+			drawPath(robot, pane, circle_start);
+			System.out.println("X Buff: " + xbuffer);
+			System.out.println("Y Buff: " + ybuffer);
 
 			movementX(robot,xbuffer,ybuffer, circle_start);
 
@@ -801,34 +680,45 @@ public class Warehouse_MidTerm extends Application
 		{
 
 			distleft = distance[ry][rx - 1];
-			System.out.println("Distance Left Field " + distleft);
+			//System.out.println("Distance Left Field " + distleft);
 
 		}
 		if (rx < 8)
 		{
 			distright = distance[ry][rx + 1];
-			System.out.println("Distance Right Field " + distright);
+			//System.out.println("Distance Right Field " + distright);
 
 		}
 		if (ry < 8)
 		{
 			distbottom = distance[ry + 1][rx];
-			System.out.println("Distance Bottom Field " + distbottom);
+			//System.out.println("Distance Bottom Field " + distbottom);
 
 		}
 		if (ry > 0)
 		{
 
 			disttop = distance[ry - 1][rx];
-			System.out.println("Distance Top Field " + disttop);
+			//System.out.println("Distance Top Field " + disttop);
 		}
 
+		System.out.println("Distance Left Field " + distleft);
+		System.out.println("Distance Right Field " + distright);
+		System.out.println("Distance Bottom Field " + distbottom);
+		System.out.println("Distance Top Field " + disttop);
 
-		int leftORright = Integer.compare(distright,distleft);
-		int leftORbottom = Integer.compare(distbottom,distleft);
-		int leftORtop = Integer.compare(disttop,distleft);
-		int topORbottom = Integer.compare(distbottom,disttop);
+
+		int leftORright = Integer.compare(distright, distleft);
+		int leftORbottom = Integer.compare(distbottom, distleft);
+		int leftORtop = Integer.compare(disttop, distleft);
+
+
+		int topORbottom = Integer.compare(distbottom, disttop);
+
+
 		int bottomORtop = Integer.compare(disttop,distbottom);
+
+
 		int rightORtop = Integer.compare(disttop,distright);
 		int rightORbottom = Integer.compare(distbottom,distright);
 
@@ -853,8 +743,8 @@ public class Warehouse_MidTerm extends Application
 		System.out.println("Value Bottom: "+(bottomORtop));
 
 
-		int valueleft = (leftORbottom+leftORright+leftORtop);
-		int valueright = (rightORbottom+rightORtop+leftORright);
+		int valueleft = (leftORbottom + leftORright + leftORtop);
+		int valueright = (rightORbottom + rightORtop + leftORright);
 		//int valuetop = topORbottom;
 		//int valuebottom = bottomORtop;
 
@@ -863,38 +753,42 @@ public class Warehouse_MidTerm extends Application
 
 		//System.out.println("Direction: "+direction);
 
-		if (valueleft>0)
+		if ((topORbottom > 0) & (disttop != -1))
+		{
+			System.out.println("Going Up");
+			array[ry][rx] = 'O';
+			ybuffer = ybuffer - 1;
+			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry - 1, rx);
+		} else if ((valueleft > 0) & (distleft != -1))
 		{
 
 			System.out.println("Going Left");
-			array[ry][rx]= 'O';
-			xbuffer=xbuffer-1;
-			searchPath(robot,mov+1, path, pane, circle_start, trys+1,ry, rx-1);
+			array[ry][rx] = 'O';
+			xbuffer = xbuffer - 1;
 
-		}else if (valueright>0)
-		{
 
-			System.out.println("Going right");
-			array[ry][rx]= 'O';
-			xbuffer=xbuffer+1;
-			searchPath(robot,mov+1, path, pane, circle_start, trys+1,ry, rx+1);
+			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry, rx - 1);
 
-		}else if (topORbottom>0)
-		{
-			System.out.println("Going Up");
-			array[ry][rx]= 'O';
-			ybuffer=ybuffer-1;
-			searchPath(robot,mov+1, path, pane, circle_start, trys+1,ry-1, rx);
-		}else if (bottomORtop>0)
+		} else if ((bottomORtop > 0) & (distbottom != -1))
 		{
 
 			System.out.println("Going Down");
-			array[ry][rx]= 'O';
-			ybuffer=ybuffer+1;
-			searchPath(robot,mov+1, path, pane, circle_start, trys+1,ry+1, rx);
+			array[ry][rx] = 'O';
+			ybuffer = ybuffer + 1;
+			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry + 1, rx);
+		} else if ((valueright > 0) & (distright != -1))
+		{
+
+
+			System.out.println("Going right");
+			array[ry][rx] = 'O';
+			xbuffer = xbuffer + 1;
+			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry, rx + 1);
+
 		}
 
-
+		//System.out.println("No Path?");
+		//drawPath(robot,pane,circle_start);
 
 	}
 
@@ -919,16 +813,16 @@ public class Warehouse_MidTerm extends Application
 		rx= (rx/50)-1;
 		ry= (ry/50)-1;
 
-		cx= (cx/50)-1;
-		cy= (cy/50)-1;
+		cx = (cx / 50) - 1;
+		cy = (cy / 50) - 1;
 
-		System.out.print("CX: "+cx+" ");
-		System.out.print("CY: "+cy+" | ");
-		System.out.print("RX: "+rx+" ");
-		System.out.println("RY: "+ry);
+		System.out.print("CX: " + cx + " ");
+		System.out.print("CY: " + cy + " | ");
+		System.out.print("RX: " + rx + " ");
+		System.out.println("RY: " + ry);
 
-		array[cy][cx]= 'G';
-
+		array[cy][cx] = 'G';
+		//array[4][2]= 'W';
 
 		//System.out.println("   1 2 3 4 5 6 7 8");
 
@@ -937,16 +831,20 @@ public class Warehouse_MidTerm extends Application
 
 	}
 
-
-	void findDistance(char[][] matrix){
+	//Search Magic   !! dont touch it !!
+	void findDistance(char[][] matrix)
+	{
 
 		System.out.println("DISTANCE MAP");
 		distance = new int[matrix.length][matrix[0].length];
 		Queue<Guard_Companion> q = new LinkedList<>();
-		for(int i=0;i<matrix.length;i++){
-			for(int j=0;j<matrix[0].length;j++){
-				if(matrix[i][j]=='G'){
-					distance[i][j]=0;
+		for (int i = 0; i < matrix.length; i++)
+		{
+			for (int j = 0; j < matrix[0].length; j++)
+			{
+				if (matrix[i][j] == 'G')
+				{
+					distance[i][j] = 0;
 					Guard_Companion companion1 = new Guard_Companion();
 					companion1.distance=0;
 					companion1.i=i;
@@ -984,15 +882,19 @@ public class Warehouse_MidTerm extends Application
 		{
 			for (int j = 0; j < distance[0].length; j++)
 			{
-				System.out.print(ints[j] + " ");
+				System.out.printf("%3.5s", ints[j]);
+				//System.out.print(ints[j] + " ");
 			}
 			System.out.println();
 		}
 	}
 
-	boolean isSafe(int row, int column, int[][] distance, char[][] matrix){
-		return row<matrix.length && row>=0 && column<matrix[0].length && column>=0 && distance[row][column]==-1 && matrix[row][column]=='O';
+	boolean isSafe(int row, int column, int[][] distance, char[][] matrix)
+	{
+		return row < matrix.length && row >= 0 && column < matrix[0].length && column >= 0 && distance[row][column] == -1 && matrix[row][column] == 'O';
 	}
+
+	//Now you may touch it
 
 	void print_array()
 	{
@@ -1001,7 +903,7 @@ public class Warehouse_MidTerm extends Application
 		for (int i = 0; i < 9; i++)
 		{
 			//System.out.print(i+1+" ");
-			System.out.print(i+" ");
+			System.out.print(i + " ");
 			System.out.print("|");
 
 			for (int j = 0; j < 9; j++)
