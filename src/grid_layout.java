@@ -1,13 +1,14 @@
 import javafx.animation.PathTransition;
-import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -18,6 +19,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -27,22 +29,18 @@ public class grid_layout extends Application
 {
 
 
+	final char[][] array = new char[9][9];
+	final Random r = new Random();
+	final Line path = new Line();
 	public int xbuffer;
 	public int ybuffer;
-
 	public int movmentX;
 	public int movmentY;
 	 int MinX =50;
 	 int MinY =50;
 	 int MaxX =450;
 	 int MaxY =450;
-	char[][] array = new char[9][9];
 	int[][] distance;
-	Random r = new Random();
-
-	Line path = new Line();
-
-
 
 	@Override
 	public void start(Stage stage)
@@ -58,8 +56,6 @@ public class grid_layout extends Application
 		robot.setY(250-15);
 		robot.setPreserveRatio(true);
 
-
-
 		path.setStroke(Color.DARKBLUE);
 		path.setVisible(true);
 
@@ -74,8 +70,6 @@ public class grid_layout extends Application
 		circle_start.setRadius(5);
 		circle_start.setCenterX(robot.getX()+15);
 		circle_start.setCenterY(robot.getY()+15);
-
-
 
 
 		Pane pane = new Pane();
@@ -104,6 +98,7 @@ public class grid_layout extends Application
 		border.setLeft(vBox2);
 
 
+
 		// Create a button
 		Button bt_left = new Button("Left");
 		Button bt_right = new Button("Right");
@@ -129,20 +124,8 @@ public class grid_layout extends Application
 		//y_coor.setText(String.valueOf((int) robot.getY()+15));
 		info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 
-		/**
-		for (int i = 0; i <= 400; i+=50)
-		{
-			//System.out.println(i);
-			Text text1 = new Text(String.valueOf(i));
-			Text text2 = new Text(String.valueOf(i));
-			Line line1 = new Line(i, 0, i, VERTI);
-			Line line2 = new Line(0, i, HORIZ, i);
-			pane.getChildren().addAll(line1,line2);
-			hBox2.getChildren().add(text1);
-			vBox2.getChildren().add(text2);
-		}
-		
-		**/
+
+
 
 		for (int i = 50; i <= 450 ; i+=50)
 		{
@@ -271,9 +254,10 @@ public class grid_layout extends Application
 		{
 			circle.setCenterX(ran());
 			circle.setCenterY(ran());
-			//makeArray(circle,robot);
-			//findDistance(array);
-			//find_path(circle,robot);
+
+
+			//circle.setCenterX(250);
+			//circle.setCenterY(50);
 
 		});
 
@@ -286,17 +270,27 @@ public class grid_layout extends Application
 			circle_start.setCenterY(robot.getY()+15);
 			makeArray(circle,robot);
 			findDistance(array);
-
-			searchPath(robot,0,path, pane,circle_start, 0,(int) (robot.getX()+15)/50-1,(int) (robot.getX()+15)/50-1);
+			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
+			searchPath(robot,0,path, pane,circle_start, 0,(int) (robot.getY()+15)/50-1,(int) (robot.getX()+15)/50-1);
 
 			//find_path(circle,robot);
 		});
 
 
+		pane.setOnMousePressed((new EventHandler<MouseEvent>()
+				{
+
+					public void handle(MouseEvent event)
+					{
+						String msg = "(x: " + event.getX() + " ,y: " + event.getY() + ") -- " + "(sceneX: " + event.getSceneX() + ", sceneY: " + event.getSceneY();
+						info_text.setText(msg);
+
+					}
+				}));
+
 
 		pane.getChildren().addAll(circle,circle_start,robot,path);
-		vBox.getChildren().addAll(x_coor,y_coor,bt_turnL,bt_turnR,bt_left,bt_right,bt_down,bt_up,bt_reset,bt_circle_ran);
-		//hBox1.getChildren().addAll(bt_left,bt_right,bt_down,bt_up);
+		vBox.getChildren().addAll(x_coor,y_coor,bt_left,bt_right,bt_down,bt_up,bt_reset,bt_circle_ran);
 		hBox1.getChildren().addAll(move_count,bt_movement,bt_Find_path);
 		hBox2.getChildren().addAll(info_text);
 		//
@@ -304,7 +298,7 @@ public class grid_layout extends Application
 
 		//Scene scene = new Scene(pane,HORIZ,VERTI); // horizon , vertik
 		Scene scene2 = new Scene(border,HORIZ+150,VERTI+100); // horizon , vertik
-		stage.setTitle("Warehouse");
+		stage.setTitle("Warehouse ");
 		stage.setScene(scene2);
 		stage.show();
 
@@ -327,25 +321,19 @@ public class grid_layout extends Application
 	public void movementX(ImageView robot, int x, int y, Circle circle_start)
 	{
 
-
-
 		int distanceX = x * 50;
 		int distanceY = y * 50;
 
 		int curX = (int) (robot.getX()+15);
 		int curY= (int) (robot.getY()+15);
 		System.out.println("\n------Movement X -----");
-		System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
-		System.out.println("curX "+curX+" |  curY "+curY);
-
+		//System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
+		//System.out.println("curX "+curX+" |  curY "+curY);
 
 		PathTransition mover = new PathTransition();
 		Line pathAnimation = new Line();
 
-		SequentialTransition seqT = new SequentialTransition();
-		//PauseTransition p = new PauseTransition(Duration.millis(2500));
-		//p.setOnFinished(e -> movementY(robot, x, y, circle_start));
-		mover.setOnFinished(e -> movementY(robot, x, y, circle_start));
+
 
 		pathAnimation.setStartX(robot.getX()+15);
 		pathAnimation.setStartY(robot.getY()+15);
@@ -359,20 +347,21 @@ public class grid_layout extends Application
 			System.out.println("Moving Right "+x+"x   Distance is: "+distanceX);
 			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
 			System.out.println("Moving to X "+(curX+distanceX));
-
+			mover.setOnFinished(e -> movementY(robot, x, y, circle_start));
 			pathAnimation.setEndX(curX+distanceX);
 			pathAnimation.setEndY(robot.getY()+15);
 			mover.setDuration(Duration.millis(1500));
 			mover.setPath(pathAnimation);
 			mover.setNode(robot);
-			//mover.play();
-			//seqT.getChildren().addAll(mover);
-			//seqT.play();
-
+			mover.play();
 			robot.setX((curX+distanceX-15));
 			robot.setY(curY-15);
+			curX = (int) (robot.getX()+15);
+			//curY= (int) (robot.getY()+15);
 
-			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
+			System.out.print("CurX: "+curX+"  ");
+			System.out.println("CurY: "+curY);
+			//System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
 
 			/**
 			path.setEndX((curX+distanceX-15));
@@ -382,31 +371,34 @@ public class grid_layout extends Application
 			**/
 
 
-
-
-
 		}else if (distanceX<0) //Left
 		{
-			distanceX= Math.abs(distanceX);
+			//distanceX= Math.abs(distanceX);
 
 			rotate(robot,-90);
 
-			//pathAnimation.setStartX(robot.getX()+15);
-			//pathAnimation.setStartY(robot.getY()+15);
-			pathAnimation.setEndX(curX-distanceX);
+			pathAnimation.setEndX(curX+distanceX);
 			pathAnimation.setEndY(robot.getY()+15);
 			mover.setDuration(Duration.millis(1500));
 			mover.setPath(pathAnimation);
 			mover.setNode(robot);
-			//mover.play();
+			mover.setOnFinished(e -> movementY(robot, x, y, circle_start));
+			mover.play();
 
-
-
-			System.out.println("Moving Left "+x+"x   Distance is: -"+distanceX);
+			System.out.println("Moving Left "+x+"x   Distance is: "+distanceX);
 			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
 
-			robot.setX((curX-distanceX-15));
-			robot.setY(curY-15);
+
+
+			robot.setX((curX+distanceX-15));
+			//robot.setY(curY-15);
+
+			curX = (int) (robot.getX()+15);
+			curY= (int) (robot.getY()+15);
+
+			System.out.print("CurX: "+curX+"  ");
+			System.out.println("CurY: "+curY);
+
 			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
 
 			/**
@@ -418,10 +410,9 @@ public class grid_layout extends Application
 			**/
 
 			//return;
-		}
-		mover.play();
+		} else movementY(robot, x, y, circle_start);
 
-		System.out.print("-----------End Movement X------------\n");
+		//System.out.print("-----------End Movement X------------\n");
 		//p.play();
 
 		//transition.setOnFinished(walkFrom(to) );
@@ -433,22 +424,20 @@ public class grid_layout extends Application
 	public void movementY(ImageView robot, int x, int y, Circle circle_start)
 	{
 
-
 		int distanceX = x * 50;
 		int distanceY = y * 50;
 
 		int curX = (int) (robot.getX()+15);
 		int curY= (int) (robot.getY()+15);
 		System.out.println("\n------Movement Y -----");
-		System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
-		System.out.println("curX "+curX+" |  curY "+curY);          //Koordinaten  sind Absolut (Fenster)
+		//System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
+		//System.out.println("curX "+curX+" |  curY "+curY);          //Koordinaten  sind Absolut (Fenster)
 
 		PathTransition mover = new PathTransition();
 		Line pathAnimation = new Line();
 		//mover.setOnFinished(e -> finish(robot,path,pane circle_start));
 		pathAnimation.setStartX(curX);
 		pathAnimation.setStartY(curY);
-
 
 
 		if (distanceY >0)  //Down
@@ -465,7 +454,15 @@ public class grid_layout extends Application
 			mover.play();
 
 			robot.setY((curY+distanceY-15));
-			robot.setX(curX-15);
+			//robot.setX(curX-15);
+
+			curX = (int) (robot.getX()+15);
+			curY= (int) (robot.getY()+15);
+
+			System.out.print("CurX: "+curX+"  ");
+			System.out.println("CurY: "+curY);
+
+
 			//info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 			/**
 			path.setEndX((curX-15));
@@ -492,9 +489,15 @@ public class grid_layout extends Application
 			mover.setPath(pathAnimation);
 			mover.setNode(robot);
 			mover.play();
-
 			robot.setY((curY-distanceY-15));
-			robot.setX(curX-15);
+			//robot.setX(curX-15);
+
+
+			curX = (int) (robot.getX()+15);
+			curY= (int) (robot.getY()+15);
+
+			System.out.print("CurX: "+curX+"  ");
+			System.out.println("CurY: "+curY);
 
 			/**
 			path.setEndX((curX-15));
@@ -506,7 +509,7 @@ public class grid_layout extends Application
 			//return;
 		}
 
-		System.out.print("-----------End Movement Y-----------------\n");
+		//System.out.print("-------End Movement Y-------------\n");
 
 	}
 
@@ -659,25 +662,24 @@ public class grid_layout extends Application
 
 	}
 
-	public double ran()
+	private double ran()
 	{
 
 		int low = 1;
 		int high = 8;
 		//int result = r.nextInt(high-low) + low;
-		int rand = (r.nextInt(8) + 1) * 50; // 100, 200, 300
 
 
 		//int rand = (int) (Math.random() * 50)+25;
 		//double rand = (Math.random() * 500)+25;
 		//System.out.println(ran);
 		//System.out.println(rand);
-		return rand;
+		return (r.nextInt(8) + 1) * 50;
 	}
 
-	void finish(ImageView robot, Line path ,Pane pane, Circle circle_start)
+	void drawPath(ImageView robot, @NotNull Pane pane, @NotNull Circle circle_start)
 	{
-		System.out.println("\n---------End Methode------------");
+		System.out.println("\n----DrawPath---");
 		Line path1 = new Line();
 		Line path2 = new Line();
 		path1.setStroke(Color.BLUE);
@@ -685,40 +687,18 @@ public class grid_layout extends Application
 		pane.getChildren().addAll(path1,path2);
 		int distanceX = xbuffer * 50;
 		int distanceY = ybuffer * 50;
-		System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
+		//System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
 		int startx = (int) circle_start.getCenterX();
 		int starty = (int) circle_start.getCenterY();
-		System.out.println(startx+" "+starty);
 
 		path1.setStartX(startx);
 		path1.setStartY(starty);
-		System.out.println("Path Start: X"+path1.getStartX()+" Y "+path1.getStartY());
-
 		path1.setEndX(startx+distanceX);
 		path1.setEndY(path1.getStartY());
-		System.out.println("Path End: X"+path1.getEndX()+" Y "+path1.getEndY());
-
-		//path.setEndY(starty);
 		path2.setStartX(path1.getEndX());
 		path2.setStartY(path1.getEndY());
-
-		System.out.println("Path Start: X"+path2.getStartX()+" Y "+path2.getStartY());
 		path2.setEndX(path2.getStartX());
 		path2.setEndY(starty+distanceY);
-		System.out.println("Path End: X"+path2.getEndX()+" Y "+path2.getEndY());
-		//path.setEndY(starty);
-		//path.setStartX(startx+distanceX);
-
-		System.out.println(((startx+distanceX)));
-		System.out.println(((starty+distanceY)));
-
-
-		//path.setEndX((rx*50));
-		//path.setEndY((ry*50));
-
-
-		//System.out.println("Path Start: X"+path.getStartX()+" Y "+path.getStartY());
-		//System.out.println("Path End: X"+path.getEndX()+" Y "+path.getEndY());
 	}
 
 
@@ -775,83 +755,43 @@ public class grid_layout extends Application
 
 		//path.setStartX((rx*50));
 		//path.setStartY((ry*50));
+
 		System.out.print("Path Start: X"+path.getStartX()+" Y "+path.getStartY()+"  ");
 		System.out.println("Path End: X"+path.getEndX()+" Y "+path.getEndY());
-
+		array[ry][rx]= 'R';
 
 
 
 
 		if (dist <= 0)
 		{
-			finish(robot,path,pane,circle_start);
+
 			System.out.println("\n---------Finish------------");
 			System.out.println("Trys: "+trys);
 			System.out.println("NO SEARCH BEHINDE THIS POINT\n");
 			System.out.println("Start Movement");
-
+			drawPath(robot,pane,circle_start);
 			System.out.println("X Buff: "+xbuffer);
 			System.out.println("Y Buff: "+ybuffer);
 
-
-			//System.out.println("Before Moevement Path Start: X"+path.getStartX()+" Y "+path.getStartY());
-			//System.out.println("Before Movement Path End: X"+path.getEndX()+" Y "+path.getEndY());
 			movementX(robot,xbuffer,ybuffer, circle_start);
-
-			//path.setEndX(robot.getX()+15);
-			//path.setEndY(robot.getY()+15);
-
-			//System.out.println("After Moevement Path Start: X"+path.getStartX()+" Y "+path.getStartY());
-			//System.out.println("After Movement Path End: X"+path.getEndX()+" Y "+path.getEndY());
-			//System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
-
-
 
 			//robot.setX((rx*50+35));
 			//robot.setY((ry*50+35));
 
-			//System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
-
-			//robot.setX(rx1*50+35);
-			//robot.setY(ry1*50+35);
-
-
-			//System.out.println("Movements: "+mov);
-
-			//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 
 
 			exit=true;
 		}
 
-		array[ry][rx]= 'R';
 
-		System.out.print("Path Start: X"+path.getStartX()+" Y "+path.getStartY()+"  ");
-		System.out.println("Path End: X"+path.getEndX()+" Y "+path.getEndY());
 		if(exit) return;
-
-
-
-		//System.out.println("Playfield X: "+(rx*50)+" Y: "+(ry*50));
-		//System.out.println("X: "+robot.getX()+" Y: "+robot.getY());
 
 		//path.setEndX((rx*50));
 		//path.setEndY((ry*50));
 
-
-
-
-		//System.out.println("Last Moevement Path Start: X"+path.getStartX()+" Y "+path.getStartY());
-		//System.out.println("Last Movement Path End: X"+path.getEndX()+" Y "+path.getEndY());
-
-
-		//System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-
-		//System.out.println(rx +" "+ry);
-		//System.out.println(rx1 +" "+ry1);
-
 		System.out.println("\n");
-		//print_array();
+
 
 
 		System.out.println("Distance Current Field "+dist);
@@ -862,45 +802,18 @@ public class grid_layout extends Application
 
 			distleft = distance[ry][rx - 1];
 			System.out.println("Distance Left Field " + distleft);
-			if (distleft==0)
-			{
-				/**
-				System.out.println("Fastlane Left");
-				array[ry][rx]= 'O';
-				xbuffer=xbuffer-1;
-				searchPath(robot,mov+1, pane, circle_start, trys+1,ry, rx-1);
-				 **/
-				}
 
 		}
 		if (rx < 8)
 		{
 			distright = distance[ry][rx + 1];
 			System.out.println("Distance Right Field " + distright);
-			if (distright==0)
-			{
-				/**
-				System.out.println("Fastlane right");
-				array[ry][rx]= 'O';
-				xbuffer=xbuffer+1;
-				searchPath(robot,mov+1, pane, circle_start, trys+1,ry, rx+1);
-				**/
-			}
 
 		}
 		if (ry < 8)
 		{
 			distbottom = distance[ry + 1][rx];
 			System.out.println("Distance Bottom Field " + distbottom);
-			if (distbottom==0)
-			{
-				/**
-				System.out.println("Fastlane Down");
-				array[ry][rx]= 'O';
-				ybuffer=ybuffer+1;
-				searchPath(robot,mov+1, pane, circle_start, trys+1,ry+1, rx);
-				 **/
-			}
 
 		}
 		if (ry > 0)
@@ -908,16 +821,6 @@ public class grid_layout extends Application
 
 			disttop = distance[ry - 1][rx];
 			System.out.println("Distance Top Field " + disttop);
-			if (disttop==0)
-			{
-				/**
-				System.out.println("Fastlane Up");
-				array[ry][rx]= 'O';
-				ybuffer=ybuffer-1;
-				searchPath(robot,mov+1, pane, circle_start, trys+1,ry-1, rx);
-				 **/
-			}
-
 		}
 
 
@@ -929,7 +832,7 @@ public class grid_layout extends Application
 		int rightORtop = Integer.compare(disttop,distright);
 		int rightORbottom = Integer.compare(distbottom,distright);
 
-
+		/**
 		System.out.println("Left&Right "+ leftORright);        // -1 Right
 		System.out.println("Left&Bottom "+ leftORbottom);       //-1 Bottom
 		System.out.println("Left&Top "+ leftORtop);             //-1 top
@@ -937,11 +840,11 @@ public class grid_layout extends Application
 		System.out.println("Right&Bottom "+ rightORbottom);     //-1 bottom
 		System.out.println("Top&Bottom "+ topORbottom);         //-1 bottom
 		System.out.println("Bottom&Top "+ bottomORtop);         //-1 Up
+		**/
 
 
-
-		//Value Net
-		System.out.println("\nDIRECTION WEIGHT");
+		//Direction Probability
+		System.out.println("\nDIRECTION PROBABILITY WEIGHT");
 		System.out.println("Value Left: "+(leftORbottom+leftORright+leftORtop));
 		System.out.println("Value Right: "+(rightORbottom+rightORtop+leftORright));
 		System.out.println("Value Top: "+(topORbottom));
@@ -956,7 +859,7 @@ public class grid_layout extends Application
 		//int valuebottom = bottomORtop;
 
 
-		int direction = Integer.compare(leftORright,topORbottom);
+		//int direction = Integer.compare(leftORright,topORbottom);
 
 		//System.out.println("Direction: "+direction);
 
@@ -1039,7 +942,7 @@ public class grid_layout extends Application
 
 		System.out.println("DISTANCE MAP");
 		distance = new int[matrix.length][matrix[0].length];
-		Queue<Guard_Companion> q = new LinkedList<Guard_Companion>();
+		Queue<Guard_Companion> q = new LinkedList<>();
 		for(int i=0;i<matrix.length;i++){
 			for(int j=0;j<matrix[0].length;j++){
 				if(matrix[i][j]=='G'){
@@ -1077,18 +980,14 @@ public class grid_layout extends Application
 			q.poll();
 		}
 
-		for(int p = 0 ; p<distance.length;p++){
-			for(int j=0;j<distance[0].length;j++)
+		for (int[] ints : distance)
+		{
+			for (int j = 0; j < distance[0].length; j++)
 			{
-				System.out.print(distance[p][j]+" ");
+				System.out.print(ints[j] + " ");
 			}
 			System.out.println();
 		}
-	}
-	static class Guard_Companion {
-		int i;
-		int j;
-		int distance;
 	}
 
 	boolean isSafe(int row, int column, int[][] distance, char[][] matrix){
@@ -1127,8 +1026,10 @@ public class grid_layout extends Application
 		return this;
 	}
 
-
-
-
+	static class Guard_Companion {
+		int i;
+		int j;
+		int distance;
+	}
 
 }
