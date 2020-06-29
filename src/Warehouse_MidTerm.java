@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
-public class grid_layout extends Application
+public class Warehouse_MidTerm extends Application
 {
 
 
@@ -1016,17 +1016,18 @@ public class grid_layout extends Application
 
 	}
 
-	public grid_layout setRobotXABSOLUTE(int robotXABSOLUTE)
+	public Warehouse_MidTerm setRobotXABSOLUTE(int robotXABSOLUTE)
 	{
 		return this;
 	}
 
-	public grid_layout setRobotYABSOLUTE(int robotYABSOLUTE)
+	public Warehouse_MidTerm setRobotYABSOLUTE(int robotYABSOLUTE)
 	{
 		return this;
 	}
 
-	static class Guard_Companion {
+	static class Guard_Companion
+	{
 		int i;
 		int j;
 		int distance;
