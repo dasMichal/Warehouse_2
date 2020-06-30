@@ -1,7 +1,11 @@
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
 import javafx.animation.PathTransition;
+import javafx.animation.RotateTransition;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -9,15 +13,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polyline;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +32,9 @@ public class Warehouse_MidTerm extends Application
 {
 
 
-	final char[][] array = new char[9][9];
+	//final char[][] array = new char[9][9];
+	char[][] array;
+
 	final Random r = new Random();
 	final Line path = new Line();
 	public int xbuffer;
@@ -41,6 +45,25 @@ public class Warehouse_MidTerm extends Application
 	int MinY = 50;
 	int MaxX = 450;
 	int MaxY = 450;
+	int cost = 0;
+	int fieldx = 0;
+	int fieldy = 0;
+	Line line1;
+	Line line2;
+	Line path1;
+	Line path2;
+	Text info_text = new Text();
+	StackPane stackpane = new StackPane();
+	Image winImage = new Image("file:///C:/Users/micha/IdeaProjects/Warehouse_2/src/party.png");
+	Image imagePlayer = new Image("file:///C:/Users/micha/IdeaProjects/Warehouse_2/src/triangle-32.gif");
+	ImageView winIcon = new ImageView();
+
+	FadeTransition fadeTransition = new FadeTransition(Duration.millis(800), winIcon);
+	RotateTransition rotateTransition = new RotateTransition(Duration.millis(500), winIcon);
+	FadeTransition fadeTransitionEnd = new FadeTransition(Duration.millis(800), winIcon);
+	ParallelTransition parallelTransition = new ParallelTransition();
+
+
 	int[][] distance;
 
 	Polyline poly = new Polyline();
@@ -49,247 +72,300 @@ public class Warehouse_MidTerm extends Application
 	@Override
 	public void start(Stage stage)
 	{
-		
+
+
+		winIcon.setImage(winImage);
+		winIcon.setFitHeight(200);
+		winIcon.setPreserveRatio(true);
+		winIcon.setVisible(false);
+		winIcon.setX(150);
+		winIcon.setY(150);
+
+
+		fadeTransition.setFromValue(0);
+		fadeTransition.setToValue(1.0f);
+		fadeTransition.setCycleCount(1);
+		fadeTransition.setAutoReverse(false);
+
+		//rotateTransition.setByAngle(20);
+		rotateTransition.setFromAngle(-20);
+		rotateTransition.setToAngle(20);
+		rotateTransition.setAxis(Rotate.Z_AXIS);
+		rotateTransition.setCycleCount(4);
+		rotateTransition.setAutoReverse(true);
+
+		fadeTransitionEnd.setFromValue(1.0f);
+		fadeTransitionEnd.setToValue(0);
+		fadeTransitionEnd.setCycleCount(1);
+		fadeTransitionEnd.setAutoReverse(false);
+		parallelTransition.getChildren().addAll(fadeTransition, rotateTransition);
+
+		//---------------------------------------
+
+
 		// load the image
-		Image image = new Image("file:///C:/Users/micha/IdeaProjects/Warehouse_2/src/triangle-32.gif");
 		ImageView robot = new ImageView();
-		robot.setImage(image);
+		robot.setImage(imagePlayer);
 		robot.setCache(true);
 		robot.setFitHeight(30);
 		//robot.setX(250-15);
 		//robot.setY(250-15);
 		robot.setPreserveRatio(true);
-
 		path.setStroke(Color.DARKBLUE);
 		path.setVisible(true);
 
+
 		Circle circle = new Circle();
-		Circle circle_start = new Circle();
-		circle.setCenterX(ran());
-		circle.setCenterY(ran());
 		circle.setRadius(15);
 		circle.setStroke(Color.BLACK);
 		circle.setFill(Color.RED);
+		circle.setVisible(false);
+		Circle circle_start = new Circle();
 		circle_start.setFill(Color.BLACK);
 		circle_start.setRadius(5);
 		circle_start.setVisible(false);
-		//circle_start.setCenterX(robot.getX()+15);
-		//circle_start.setCenterY(robot.getY()+15);
 
 
 		Pane pane = new Pane();
+		Pane pane2 = new Pane();
 		double HORIZ = 500;
 		double VERTI = 500;
 		//with = breite
 
-		HBox hBox1 = new HBox(5);
-		hBox1.setSpacing(80);
-		hBox1.setAlignment(Pos.CENTER);
 
-		HBox hBox2 = new HBox();
-		hBox2.setSpacing(33);
+		HBox hBoxText = new HBox();
+		hBoxText.setSpacing(20);
+		hBoxText.setAlignment(Pos.BASELINE_LEFT);
+		hBoxText.setPadding(new Insets(10, 10, 10, 10));
+
+		HBox hBoxTop = new HBox();
+		hBoxTop.setSpacing(15);
+		hBoxTop.setAlignment(Pos.BASELINE_CENTER);
+		hBoxTop.setPadding(new Insets(20, 10, 10, 10));
 
 		VBox vBox = new VBox();
-		vBox.setSpacing(15);
-		vBox.setAlignment(Pos.CENTER);
 		vBox.setFillWidth(false);
 
-		VBox vBox2 = new VBox();
-		vBox2.setSpacing(33);
+		VBox vBoxRight = new VBox();
+		vBoxRight.setPadding(new Insets(10, 50, 10, 10));
+		vBoxRight.setSpacing(10);
+		vBoxRight.setAlignment(Pos.CENTER);
 
 		BorderPane border = new BorderPane();
-		border.setBottom(hBox1);
-		border.setCenter(pane);
-		border.setRight(vBox);
-		border.setTop(hBox2);
-		border.setLeft(vBox2);
+		border.setBottom(hBoxText);
+		border.setCenter(stackpane);
+		//border.setCenter(pane);
+		border.setRight(vBoxRight);
+		//border.setTop(hBoxTop);
+		border.setTop(vBox);
+		//border.setLeft(vBox);
 
 
 		// Create a button
-		Button bt_left = new Button("Left");
-		Button bt_right = new Button("Right");
-		Button bt_up = new Button("up");
-		Button bt_down = new Button("Down");
-		Button bt_turnR = new Button("Turn Right");
-		Button bt_turnL = new Button("Turn Left");
-		Button bt_reset = new Button("Set Robot Position ");
-		Button bt_movement = new Button("Move ");
+		Button bt_set_robot_position_ = new Button("Set Robot Position ");
+		Button bt_createField = new Button("Create Field");
 		Button bt_circle_ran = new Button("Circle Random ");
 		Button bt_Find_path = new Button("Find path ");
-		TextField x_coor = new TextField("X_Coordinaten");
-		TextField y_coor = new TextField("Y_Coordinaten");
-		TextField x_coorField = new TextField("X_Field");
-		TextField y_coorField = new TextField("Y_Field");
+		TextField x_coor_Robot = new TextField("5");
+		TextField y_coor_Robot = new TextField("5");
+		Text x_posinfo = new Text("Robot Field X");
+		Text y_posinfo = new Text("Robot Field Y");
 
-		bt_reset.setMaxWidth(20);
+
+		Text x_Fieldsize = new Text("Field X Size ");
+		Text y_Fieldsize = new Text("Field Y Size");
+		TextField x_coorField = new TextField("9");
+		TextField y_coorField = new TextField("9");
+		//bt_reset.setMaxWidth(100);
 
 		bt_Find_path.setDisable(true);
+		bt_set_robot_position_.setDisable(true);
+		bt_circle_ran.setDisable(true);
 		robot.setVisible(false);
+		x_coor_Robot.setDisable(true);
+		y_coor_Robot.setDisable(true);
 
-		TextField move_count = new TextField("1");
-		Text info_text = new Text();
-		x_coor.setPrefWidth(80);
-		x_coor.setMaxWidth(80);
-		y_coor.setPrefWidth(80);
-		y_coor.setMaxWidth(80);
-		x_coor.setText("200");
-		y_coor.setText("200");
+		x_coor_Robot.setPrefWidth(100);
+		x_coor_Robot.setMaxWidth(120);
+		y_coor_Robot.setPrefWidth(100);
+		y_coor_Robot.setMaxWidth(120);
+		x_coorField.setPrefWidth(100);
+		x_coorField.setMaxWidth(200);
+		y_coorField.setPrefWidth(100);
+		y_coorField.setMaxWidth(200);
+
 		//x_coor.setText(String.valueOf((int) robot.getX()+15));
 		//y_coor.setText(String.valueOf((int) robot.getY()+15));
-		info_text.setText("X: " + ((int) robot.getX() + 15) + " Y: " + ((int) robot.getY() + 15));
 
 
-		//Todo Feldgröße einstelbar
+		//info_text.setText("X: " + ((int) robot.getX() + 15) + " Y: " + ((int) robot.getY() + 15));
 
-		for (int i = 50; i <= 450; i += 50)
-		{
-			Line line1 = new Line(i, 50, i, 450);
-			//line1.setStroke(Color.BLUE);
-			line1.setStroke(Color.LIGHTGRAY);
-			line1.setOpacity(25);
-			pane.getChildren().add(line1);
 
-		}
-
-		for (int i = 50; i <=450 ; i+=50)
-		{
-
-			Line line2 = new Line(50, i, 450, i);
-			//line2.setStroke(Color.RED);
-			line2.setStroke(Color.LIGHTGRAY);
-			line2.setOpacity(25);
-			pane.getChildren().add(line2);
-		}
-
-		bt_left.setOnAction(e ->
-		{
-			/**
-			double test = robot.getX()-50;
-			if(test > 50)
-			{
-				robot.setX(robot.getX()-50);
-			}
-			 **/
-			//movement(robot,-1,0,info_text);
-			movementX(robot,-1,0, circle_start);
-			//movement(robot,-1,0, circle_start);
-			info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-		});
-
-		bt_right.setOnAction(e ->
-		{
-			/**
-			double test = robot.getX()+50;
-			if(test <= 450)  //375
-			{
-
-				robot.setX(robot.getX()+50);
-			}
-			 **/
-			movementX(robot,1,0, circle_start);
-			//movement(robot,1,0,circle_start);
-
-			info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-		});
-
-		bt_down.setOnAction(e ->
-		{
-			//double test = robot.getY()+50;
-			//System.out.println("TEST Down: "+test);
-			movementY(robot,0,1, circle_start);
-			//movement(robot,0,1, circle_start);
-			/**
-			if(test <= 435)
-			{
-				PathTransition pt = new PathTransition(Duration.millis(1000), new Line(robot.getX()+15, robot.getY()+15, robot.getX()+15, robot.getY()+65), robot);
-				//pt.setCycleCount(Timeline.INDEFINITE);
-				pt.play(); // Start animation
-				robot.setY(robot.getY()+50);
-			}else System.out.println("Nope");
-			 **/
-			info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-		});
-
-		bt_up.setOnAction(e ->
-		{
-			movementY(robot,0,-1, circle_start);
-			//movement(robot,0,-1, circle_start);
-			/**
-			double test = robot.getY()-50;
-			if(test >=35)
-			{
-				PathTransition pt = new PathTransition(Duration.millis(1000), new Line(robot.getX()+15, robot.getY()+15, robot.getX()+15, robot.getY()-35), robot);
-				//pt.setCycleCount(Timeline.INDEFINITE);
-				pt.play(); // Start animation
-				robot.setY(robot.getY()-50);
-			}
-			 **/
-			info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-			System.out.println("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
-
-		});
-
-		bt_turnL.setOnAction(e ->
-				robot.setRotate(robot.getRotate()-90));
-
-		bt_turnR.setOnAction(e ->
-				robot.setRotate(robot.getRotate()+90));
-
-		bt_reset.setOnAction(e ->
+		bt_set_robot_position_.setOnAction(e ->
 		{
 			xbuffer = 0;
 			ybuffer = 0;
+			winIcon.setVisible(false);
+			pane.getChildren().removeAll(path1, path2);
 
-			//int x = Integer.parseInt(x_coor.getText());
-			robot.setX((Integer.parseInt(x_coor.getText())) + 35);
-			robot.setY((Integer.parseInt(y_coor.getText())) + 35);
-			circle_start.setCenterX(robot.getX() + 15);
-			circle_start.setCenterY(robot.getY() + 15);
 
-			//robot.setX(250-15);
-			//robot.setY(250-15);
-			robot.setRotate(0);
-			bt_Find_path.setDisable(false);
-			circle_start.setVisible(true);
-			robot.setVisible(true);
-			info_text.setText("X: " + ((int) robot.getX() + 15) + " Y: " + ((int) robot.getY() + 15));
+			if ((!x_coor_Robot.getText().isEmpty()) & (!y_coor_Robot.getText().isEmpty()))
+			{
+
+				setCost(0);
+
+				int x = Integer.parseInt(x_coor_Robot.getText());
+				int y = Integer.parseInt(y_coor_Robot.getText());
+
+				if ((x > 0) & (y <= getFieldy()))
+				{
+					x_coor_Robot.setStyle(null);
+					y_coor_Robot.setStyle(null);
+
+					x = (x * 50);
+					y = (y * 50);
+
+					System.out.println(x + " " + y);
+
+
+					robot.setX(x - 15);
+					robot.setY(y - 15);
+
+					circle_start.setCenterX(robot.getX() + 15);
+					circle_start.setCenterY(robot.getY() + 15);
+
+					//robot.setX(250-15);
+					//robot.setY(250-15);
+					robot.setRotate(0);
+					bt_Find_path.setDisable(false);
+					bt_Find_path.setStyle("-fx-color:green");
+					circle_start.setVisible(true);
+					robot.setVisible(true);
+					circle.setVisible(true);
+					info_text.setText("X: " + ((int) robot.getX() + 15) + " Y: " + ((int) robot.getY() + 15));
+
+				} else
+				{
+					System.out.println("erorr");
+
+					//x_coor_Robot.setStyle("-fx-background-color: #ff0000; ");
+					//y_coor_Robot.setStyle("-fx-background-color: #ff0000; ");
+
+
+					x_coor_Robot.setStyle("  -fx-text-box-border: red ; -fx-focus-color: red ;");
+					y_coor_Robot.setStyle("  -fx-text-box-border: red ; -fx-focus-color: red ;");
+
+					x_coor_Robot.setPromptText("1");
+					y_coor_Robot.setPromptText("1");
+
+					x_coor_Robot.setFocusTraversable(false);
+					y_coor_Robot.setFocusTraversable(false);
+
+				}
+
+			} else
+			{
+				x_coor_Robot.setStyle("  -fx-text-box-border: red ; -fx-focus-color: red ;");
+				y_coor_Robot.setStyle("  -fx-text-box-border: red ; -fx-focus-color: red ;");
+
+
+				x_coor_Robot.setPromptText("Canot be empty");
+				y_coor_Robot.setPromptText("Canot be empty");
+
+				x_coor_Robot.setFocusTraversable(false);
+				y_coor_Robot.setFocusTraversable(false);
+			}
 
 		});
 
-		bt_movement.setOnAction(e ->
+		bt_createField.setOnAction(e ->
 		{
+			winIcon.setVisible(false);
+			//x_Fieldsize
+			//y_Fieldsize.getText()
 
 
-			//movement(robot,1,2, circle_start);
+			if ((!x_coorField.getText().isEmpty()) & (!y_coorField.getText().isEmpty()))
+			{
+
+				int fieldx = Integer.parseInt(x_coorField.getText());
+				int fieldy = Integer.parseInt(y_coorField.getText());
+
+				System.out.println(fieldx + " " + fieldy);
+
+
+				if (((fieldx) & (fieldy)) != 0)
+				{
+					x_coorField.setStyle(null);
+					y_coorField.setStyle(null);
+
+					array = new char[fieldy][fieldx];
+					drawField(pane2, fieldx, fieldy);
+					setFieldx(fieldx);
+					setFieldy(fieldy);
+					circle.setCenterX(ranX());
+					circle.setCenterY(ranY());
+					bt_set_robot_position_.setDisable(false);
+					x_coor_Robot.setDisable(false);
+					y_coor_Robot.setDisable(false);
+					bt_circle_ran.setDisable(false);
+
+				} else
+				{
+
+					x_coorField.setStyle("  -fx-text-box-border: red ; -fx-focus-color: red ;");
+					y_coorField.setStyle("  -fx-text-box-border: red ; -fx-focus-color: red ;");
+					x_coorField.setPromptText("Size != 0");
+					y_coorField.setPromptText("Size  != 0");
+					x_coorField.clear();
+					y_coorField.clear();
+				}
+
+			} else
+			{
+
+				//x_coorField.setStyle("-fx-background-color: #ff0000; ");
+				//y_coorField.setStyle("-fx-background-color: #ff0000; ");
+				x_coorField.setStyle("  -fx-text-box-border: red ; -fx-focus-color: red ;");
+				y_coorField.setStyle("  -fx-text-box-border: red ; -fx-focus-color: red ;");
+
+				x_coorField.setPromptText("Canot be empty");
+				y_coorField.setPromptText("Canot be empty");
+
+				x_coorField.setFocusTraversable(false);
+				y_coorField.setFocusTraversable(false);
+
+
+			}
+
 
 		});
+
 
 		bt_circle_ran.setOnAction(e ->
 		{
-			//circle.setCenterX(ran());
-			//circle.setCenterY(ran());
+			//circle.setCenterX(150);
+			//circle.setCenterY(50);
 
-
-			circle.setCenterX(150);
-			circle.setCenterY(50);
-
+			circle.setCenterX(ranX());
+			circle.setCenterY(ranY());
+			circle.setVisible(true);
 
 		});
 
 		bt_Find_path.setOnAction(e ->
 		{
-			xbuffer=0;
-			ybuffer=0;
+			winIcon.setVisible(false);
+			xbuffer = 0;
+			ybuffer = 0;
+			setCost(0);
 			//setRobotXABSOLUTE(robot.getX()+15);
-			circle_start.setCenterX(robot.getX()+15);
-			circle_start.setCenterY(robot.getY()+15);
-			makeArray(circle,robot);
+			circle_start.setCenterX(robot.getX() + 15);
+			circle_start.setCenterY(robot.getY() + 15);
+			makeArray(circle, robot);
 			findDistance(array);
-			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
-			searchPath(robot,0,path, pane,circle_start, 0,(int) (robot.getY()+15)/50-1,(int) (robot.getX()+15)/50-1);
+			System.out.println("X: " + (robot.getX() + 15) + " Y: " + (robot.getY() + 15));
+			searchPath(robot, 0, path, pane, circle_start, 0, (int) (robot.getY() + 15) / 50 - 1, (int) (robot.getX() + 15) / 50 - 1);
 			//find_path(circle,robot);
 
 
@@ -300,30 +376,26 @@ public class Warehouse_MidTerm extends Application
 		{
 			public void handle(MouseEvent event)
 			{
-				String msg = "(x: " + event.getX() + " ,y: " + event.getY() + ") -- " + "(sceneX: " + event.getSceneX() + ", sceneY: " + event.getSceneY();
-				info_text.setText(msg);
+				//String msg = "(x: " + event.getX() + " ,y: " + event.getY() + ") -- " + "(sceneX: " + event.getSceneX() + ", sceneY: " + event.getSceneY();
+				//info_text.setText(msg);
 
 			}
 		}));
 
 
-		pane.getChildren().addAll(circle, circle_start, robot, path, poly);
-		vBox.getChildren().addAll(x_coor, y_coor, bt_left, bt_right, bt_down, bt_up, bt_reset, bt_circle_ran);
-		hBox1.getChildren().addAll(move_count, bt_movement, bt_Find_path);
-		hBox2.getChildren().addAll(info_text);
-		//
+		pane.getChildren().addAll(circle, circle_start, robot, path, poly, winIcon);
+		hBoxTop.getChildren().addAll(x_posinfo, x_coor_Robot, y_posinfo, y_coor_Robot, bt_set_robot_position_, bt_Find_path);
+		hBoxText.getChildren().addAll(x_Fieldsize, x_coorField, y_Fieldsize, y_coorField, bt_createField, bt_circle_ran);
+		vBox.getChildren().addAll(hBoxTop, hBoxText);
+		vBoxRight.getChildren().addAll(info_text);
+
+		stackpane.getChildren().addAll(pane, pane2);
 
 
-		//Scene scene = new Scene(pane,HORIZ,VERTI); // horizon , vertik
 		Scene scene2 = new Scene(border, HORIZ + 150, VERTI + 100); // horizon , vertik
 		stage.setTitle("Warehouse ");
 		stage.setScene(scene2);
 		stage.show();
-
-		//makeArray(circle,robot);
-		//findDistance(array);
-		//searchPath(robot,0, pane,circle_start, 0,(int) (robot.getX()+15)/50-1,(int) (robot.getX()+15)/50-1);
-		//find_path(circle,robot);
 
 
 	}
@@ -331,21 +403,58 @@ public class Warehouse_MidTerm extends Application
 
 	//public void movement(ImageView robot, int x,int y, Text info_text)
 
-	public void movementX(ImageView robot, int x, int y, Circle circle_start)
+
+	public void drawField(Pane pane2, int x, int y)
 	{
 
+		//pane.getChildren().removeAll(line1,line2);
+		pane2.getChildren().clear();
+
+		x = x * 50;
+		y = y * 50;
+
+		for (int i = 50; i <= x; i += 50)
+		{
+
+			line1 = new Line(i, 50, i, y);
+			//line1.setStroke(Color.BLUE);
+			line1.setStroke(Color.LIGHTGRAY);
+			//line1.setOpacity(25);
+			pane2.getChildren().add(line1);
+			pane2.getChildren().add(new Text(i, 30, String.valueOf((i / 50))));
+
+
+		}
+
+		for (int i = 50; i <= y; i += 50)
+		{
+
+
+			line2 = new Line(50, i, x, i);
+			//line2.setStroke(Color.RED);
+			line2.setStroke(Color.LIGHTGRAY);
+			//line2.setOpacity(25);
+			pane2.getChildren().add(line2);
+			pane2.getChildren().add(new Text(5, i, String.valueOf((i / 50))));
+		}
+
+
+	}
+
+
+	public void movementX(ImageView robot, int x, int y, Circle circle_start)
+	{
 		int distanceX = x * 50;
 		int distanceY = y * 50;
 
-		int curX = (int) (robot.getX()+15);
-		int curY= (int) (robot.getY()+15);
+		int curX = (int) (robot.getX() + 15);
+		int curY = (int) (robot.getY() + 15);
 		System.out.println("\n------Movement X -----");
 		//System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
 		//System.out.println("curX "+curX+" |  curY "+curY);
 
 		PathTransition mover = new PathTransition();
 		Line pathAnimation = new Line();
-
 
 
 		pathAnimation.setStartX(robot.getX()+15);
@@ -355,14 +464,14 @@ public class Warehouse_MidTerm extends Application
 		if (distanceX>0)    //right
 		{
 			rotate(robot, 90);
-
+			cost = cost + 1;
 			System.out.println("Moving Right " + x + "x   Distance is: " + distanceX);
 			//info_text.setText("Moving "+x+"x   Distance is: "+distanceX);
 			System.out.println("Moving to X " + (curX + distanceX));
 			mover.setOnFinished(e -> movementY(robot, x, y, circle_start));
 			pathAnimation.setEndX(curX + distanceX);
 			pathAnimation.setEndY(robot.getY() + 15);
-			mover.setDuration(Duration.millis(2300));
+			mover.setDuration(Duration.millis(1500));
 			mover.setPath(pathAnimation);
 			//mover.setPath(poly);
 			mover.setNode(robot);
@@ -377,11 +486,11 @@ public class Warehouse_MidTerm extends Application
 			//System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
 
 			/**
-			path.setEndX((curX+distanceX-15));
-			path.setEndY((curY-15));
-			path.setStartX((curX+distanceX-15));
-			path.setStartY((curY-15));
-			**/
+			 path.setEndX((curX+distanceX-15));
+			 path.setEndY((curY-15));
+			 path.setStartX((curX+distanceX-15));
+			 path.setStartY((curY-15));
+			 **/
 
 
 		}else if (distanceX<0) //Left
@@ -389,10 +498,10 @@ public class Warehouse_MidTerm extends Application
 			//distanceX= Math.abs(distanceX);
 
 			rotate(robot, -90);
-
+			cost = cost + 1;
 			pathAnimation.setEndX(curX + distanceX);
 			pathAnimation.setEndY(robot.getY() + 15);
-			mover.setDuration(Duration.millis(2300));
+			mover.setDuration(Duration.millis(1500));
 			mover.setPath(pathAnimation);
 			//mover.setPath(poly);
 			mover.setNode(robot);
@@ -415,12 +524,12 @@ public class Warehouse_MidTerm extends Application
 			System.out.println("X: "+(robot.getX()+15)+" Y: "+(robot.getY()+15));
 
 			/**
-			path.setEndX((curX-distanceX-15));
-			path.setEndY((curY-15));
+			 path.setEndX((curX-distanceX-15));
+			 path.setEndY((curY-15));
 
-			path.setStartX((curX-distanceX-15));
-			path.setStartY((curY-15));
-			**/
+			 path.setStartX((curX-distanceX-15));
+			 path.setStartY((curY-15));
+			 **/
 
 			//return;
 		} else movementY(robot, x, y, circle_start);
@@ -440,28 +549,28 @@ public class Warehouse_MidTerm extends Application
 		int distanceX = x * 50;
 		int distanceY = y * 50;
 
-		int curX = (int) (robot.getX()+15);
-		int curY= (int) (robot.getY()+15);
+		int curX = (int) (robot.getX() + 15);
+		int curY = (int) (robot.getY() + 15);
 		System.out.println("\n------Movement Y -----");
 		//System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
 		//System.out.println("curX "+curX+" |  curY "+curY);          //Koordinaten  sind Absolut (Fenster)
 
 		PathTransition mover = new PathTransition();
 		Line pathAnimation = new Line();
-		//mover.setOnFinished(e -> finish(robot,path,pane circle_start));
+		mover.setOnFinished(e -> win(stackpane, winIcon));
 		pathAnimation.setStartX(curX);
 		pathAnimation.setStartY(curY);
 
 
-		if (distanceY >0)  //Down
+		if (distanceY > 0)  //Down
 		{
 			rotate(robot, 180);
-
+			cost = cost + 1;
 			System.out.println("\nMoving Down " + y + "x   Distance is: " + distanceY);
 
 			pathAnimation.setEndX(robot.getX() + 15);
 			pathAnimation.setEndY(curY + distanceY);
-			mover.setDuration(Duration.millis(2300));
+			mover.setDuration(Duration.millis(1500));
 			mover.setPath(pathAnimation);
 			//mover.setPath(poly);
 			mover.setNode(robot);
@@ -479,17 +588,18 @@ public class Warehouse_MidTerm extends Application
 
 			//info_text.setText("X: "+((int) robot.getX()+15)+" Y: "+((int) robot.getY()+15));
 			/**
-			path.setEndX((curX-15));
-			path.setEndY((curY+distanceY-15));
+			 path.setEndX((curX-15));
+			 path.setEndY((curY+distanceY-15));
 
-			path.setStartX((curX-15));
-			path.setStartY((curY+distanceY-15));
-			**/
+			 path.setStartX((curX-15));
+			 path.setStartY((curY+distanceY-15));
+			 **/
 
 			//return;
 		}else if (distanceY < 0)  //Up
 		{
 			rotate(robot, 0);
+			cost = cost + 1;
 			distanceY = Math.abs(distanceY);
 			System.out.println("Moving Up " + y + "x   Distance is: -" + distanceY);
 			//info_text.setText("Moving "+y+"x   Distance is: "+distanceY);
@@ -499,7 +609,7 @@ public class Warehouse_MidTerm extends Application
 
 			pathAnimation.setEndX(robot.getX() + 15);
 			pathAnimation.setEndY(curY - distanceY);
-			mover.setDuration(Duration.millis(2300));
+			mover.setDuration(Duration.millis(1500));
 			mover.setPath(pathAnimation);
 			//mover.setPath(poly);
 			mover.setNode(robot);
@@ -512,33 +622,32 @@ public class Warehouse_MidTerm extends Application
 			curY = (int) (robot.getY() + 15);
 
 			System.out.print("CurX: " + curX + "  ");
-			System.out.println("CurY: "+curY);
+			System.out.println("CurY: " + curY);
 
 			/**
-			path.setEndX((curX-15));
-			path.setEndY((curY-distanceY-15));
+			 path.setEndX((curX-15));
+			 path.setEndY((curY-distanceY-15));
 
-			path.setStartX((curX-15));
-			path.setStartY((curY-distanceY-15));
-			**/
+			 path.setStartX((curX-15));
+			 path.setStartY((curY-distanceY-15));
+			 **/
 			//return;
-		}
+		} else win(stackpane, winIcon);
 
 		//System.out.print("-------End Movement Y-------------\n");
 
 	}
 
 
-
-	void rotate(ImageView robot,int steps)
+	void rotate(ImageView robot, int steps)
 	{
-
-		if (steps >360) steps = 0;
+		cost = cost + 1;
+		if (steps > 360) steps = 0;
 		robot.setRotate(steps);
 
 	}
 
-	private double ran()
+	private double ranX()
 	{
 
 		int low = 1;
@@ -546,23 +655,59 @@ public class Warehouse_MidTerm extends Application
 		//int result = r.nextInt(high-low) + low;
 
 
+		//int rand = (int) (Math.random() * 50)+25;
+		//double rand = (Math.random() * 500)+25;
+		//System.out.println(ran);
+		//System.out.println(rand);
+		return (r.nextInt((getFieldx() - 1)) + 1) * 50;
+	}
+
+	private double ranY()
+	{
+
+
+		//int result = r.nextInt(high-low) + low;
+
 
 		//int rand = (int) (Math.random() * 50)+25;
 		//double rand = (Math.random() * 500)+25;
 		//System.out.println(ran);
 		//System.out.println(rand);
-		return (r.nextInt(8) + 1) * 50;
+		return (r.nextInt((getFieldy() - 1)) + 1) * 50;
 	}
+
+
+	/**
+	 * private double ran()
+	 * {
+	 * <p>
+	 * int low = 1;
+	 * int high = 8;
+	 * //int result = r.nextInt(high-low) + low;
+	 * <p>
+	 * <p>
+	 * <p>
+	 * //int rand = (int) (Math.random() * 50)+25;
+	 * //double rand = (Math.random() * 500)+25;
+	 * //System.out.println(ran);
+	 * //System.out.println(rand);
+	 * return (r.nextInt(8) + 1) * 50;
+	 * }
+	 **/
 
 
 	void drawPath(ImageView robot, @NotNull Pane pane, @NotNull Circle circle_start)
 	{
 		System.out.println("\n----DrawPath---");
-		Line path1 = new Line();
-		Line path2 = new Line();
+
+
+		pane.getChildren().removeAll(path1, path2);
+
+		path1 = new Line();
+		path2 = new Line();
 		path1.setStroke(Color.BLUE);
 		path2.setStroke(Color.BLUE);
-		pane.getChildren().addAll(path1,path2);
+		pane.getChildren().addAll(path1, path2);
 		int distanceX = xbuffer * 50;
 		int distanceY = ybuffer * 50;
 		//System.out.println("DistanceX "+distanceX+" |  DistanceY "+distanceY);
@@ -624,9 +769,9 @@ public class Warehouse_MidTerm extends Application
 
 		System.out.println(dist);
 		System.out.print("Robo Current Field  --> ");
-		System.out.println("X: "+(rx*50)+" Y: "+(ry*50));
+		System.out.println("X: "+(rx*50)+" Y: "+(ry* 50));
 		System.out.print("Robo Current Array Field  --> ");
-		System.out.println("X: "+rx+" Y: "+ry);
+		System.out.println("X: " + rx + " Y: " + ry);
 
 		//System.out.println("RX: "+rx+" Calc :"+rx*50+35 );
 		//System.out.println("RY: "+ry+" Calc: "+ry*50+35 );
@@ -636,6 +781,9 @@ public class Warehouse_MidTerm extends Application
 
 		//path.setStartX((rx*50));
 		//path.setStartY((ry*50));
+
+		System.out.println(array.length);
+		System.out.println(array[0].length);
 
 		System.out.print("Path Start: X" + path.getStartX() + " Y " + path.getStartY() + "  ");
 		System.out.println("Path End: X" + path.getEndX() + " Y " + path.getEndY());
@@ -659,12 +807,11 @@ public class Warehouse_MidTerm extends Application
 			//robot.setY((ry*50+35));
 
 
-
 			exit=true;
 		}
 
 
-		if(exit) return;
+		if (exit) return;
 
 		//path.setEndX((rx*50));
 		//path.setEndY((ry*50));
@@ -672,8 +819,7 @@ public class Warehouse_MidTerm extends Application
 		System.out.println("\n");
 
 
-
-		System.out.println("Distance Current Field "+dist);
+		System.out.println("Distance Current Field " + dist);
 
 
 		if (rx > 0)
@@ -683,13 +829,13 @@ public class Warehouse_MidTerm extends Application
 			//System.out.println("Distance Left Field " + distleft);
 
 		}
-		if (rx < 8)
+		if (rx < (getFieldx() - 1))
 		{
 			distright = distance[ry][rx + 1];
 			//System.out.println("Distance Right Field " + distright);
 
 		}
-		if (ry < 8)
+		if (ry < (getFieldy() - 1))
 		{
 			distbottom = distance[ry + 1][rx];
 			//System.out.println("Distance Bottom Field " + distbottom);
@@ -723,14 +869,14 @@ public class Warehouse_MidTerm extends Application
 		int rightORbottom = Integer.compare(distbottom,distright);
 
 		/**
-		System.out.println("Left&Right "+ leftORright);        // -1 Right
-		System.out.println("Left&Bottom "+ leftORbottom);       //-1 Bottom
-		System.out.println("Left&Top "+ leftORtop);             //-1 top
-		System.out.println("Right&Top "+ rightORtop);           //-1 top
-		System.out.println("Right&Bottom "+ rightORbottom);     //-1 bottom
-		System.out.println("Top&Bottom "+ topORbottom);         //-1 bottom
-		System.out.println("Bottom&Top "+ bottomORtop);         //-1 Up
-		**/
+		 System.out.println("Left&Right "+ leftORright);        // -1 Right
+		 System.out.println("Left&Bottom "+ leftORbottom);       //-1 Bottom
+		 System.out.println("Left&Top "+ leftORtop);             //-1 top
+		 System.out.println("Right&Top "+ rightORtop);           //-1 top
+		 System.out.println("Right&Bottom "+ rightORbottom);     //-1 bottom
+		 System.out.println("Top&Bottom "+ topORbottom);         //-1 bottom
+		 System.out.println("Bottom&Top "+ bottomORtop);         //-1 Up
+		 **/
 
 
 		//Direction Probability
@@ -740,7 +886,7 @@ public class Warehouse_MidTerm extends Application
 		System.out.println("Value Top: "+(topORbottom));
 		//System.out.println("Value Top: "+(topORbottom+leftORtop+rightORtop));
 		//System.out.println("Value Bottom: "+(bottomORtop+leftORbottom+rightORbottom));
-		System.out.println("Value Bottom: "+(bottomORtop));
+		System.out.println("Value Bottom: " + (bottomORtop));
 
 
 		int valueleft = (leftORbottom + leftORright + leftORtop);
@@ -753,13 +899,7 @@ public class Warehouse_MidTerm extends Application
 
 		//System.out.println("Direction: "+direction);
 
-		if ((topORbottom > 0) & (disttop != -1))
-		{
-			System.out.println("Going Up");
-			array[ry][rx] = 'O';
-			ybuffer = ybuffer - 1;
-			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry - 1, rx);
-		} else if ((valueleft > 0) & (distleft != -1))
+		if ((valueleft > 0) & (distleft != -1))
 		{
 
 			System.out.println("Going Left");
@@ -769,14 +909,7 @@ public class Warehouse_MidTerm extends Application
 
 			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry, rx - 1);
 
-		} else if ((bottomORtop > 0) & (distbottom != -1))
-		{
-
-			System.out.println("Going Down");
-			array[ry][rx] = 'O';
-			ybuffer = ybuffer + 1;
-			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry + 1, rx);
-		} else if ((valueright > 0) & (distright != -1))
+		} else if (valueright > 0)
 		{
 
 
@@ -785,6 +918,19 @@ public class Warehouse_MidTerm extends Application
 			xbuffer = xbuffer + 1;
 			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry, rx + 1);
 
+		} else if (topORbottom > 0)
+		{
+			System.out.println("Going Up");
+			array[ry][rx] = 'O';
+			ybuffer = ybuffer - 1;
+			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry - 1, rx);
+		} else if (bottomORtop > 0)
+		{
+
+			System.out.println("Going Down");
+			array[ry][rx] = 'O';
+			ybuffer = ybuffer + 1;
+			searchPath(robot, mov + 1, path, pane, circle_start, trys + 1, ry + 1, rx);
 		}
 
 		//System.out.println("No Path?");
@@ -796,9 +942,9 @@ public class Warehouse_MidTerm extends Application
 	void makeArray(Circle circle, ImageView robot)
 	{
 
-		for (int i = 0; i < 9; i++)
+		for (int i = 0; i < getFieldy(); i++)
 		{
-			for (int j = 0; j < 9; j++)
+			for (int j = 0; j < getFieldx(); j++)
 			{
 				array[i][j] = 'O';
 			}
@@ -864,7 +1010,7 @@ public class Warehouse_MidTerm extends Application
 			int dist = companion2.distance;
 			int[] rowNeighbour =    {0,0,1,-1};
 			int[] columnNeighbour = {1,-1,0,0};
-			for(int k=0;k<4;k++){
+			for(int k=0; k<4; k++){
 				if(isSafe(i+rowNeighbour[k], j+columnNeighbour[k], distance, matrix)){
 					distance[i+rowNeighbour[k]][j+columnNeighbour[k]] = dist+1;
 					Guard_Companion companion3 = new Guard_Companion();
@@ -900,13 +1046,13 @@ public class Warehouse_MidTerm extends Application
 	{
 		System.out.println("   0 1 2 3 4 5 6 7 8");
 
-		for (int i = 0; i < 9; i++)
+		for (int i = 0; i < getFieldy(); i++)
 		{
 			//System.out.print(i+1+" ");
 			System.out.print(i + " ");
 			System.out.print("|");
 
-			for (int j = 0; j < 9; j++)
+			for (int j = 0; j < getFieldx(); j++)
 			{
 				System.out.print(array[i][j]);
 				System.out.print("|");
@@ -916,6 +1062,42 @@ public class Warehouse_MidTerm extends Application
 		System.out.println("\n");
 
 
+	}
+
+	void win(StackPane stackPane, ImageView party)
+	{
+		party.setVisible(true);
+
+
+		parallelTransition.play();
+
+		parallelTransition.setOnFinished(e -> fadeTransitionEnd.play());
+		//rotateTransition.play();
+		info_text.setText("Finish\n Cost " + cost);
+
+	}
+
+
+	public int getFieldx()
+	{
+		return fieldx;
+	}
+
+	public Warehouse_MidTerm setFieldx(int fieldx)
+	{
+		this.fieldx = fieldx;
+		return this;
+	}
+
+	public int getFieldy()
+	{
+		return fieldy;
+	}
+
+	public Warehouse_MidTerm setFieldy(int fieldy)
+	{
+		this.fieldy = fieldy;
+		return this;
 	}
 
 	public Warehouse_MidTerm setRobotXABSOLUTE(int robotXABSOLUTE)
@@ -933,6 +1115,16 @@ public class Warehouse_MidTerm extends Application
 		int i;
 		int j;
 		int distance;
+	}
+
+	public int getCost()
+	{
+		return cost;
+	}
+
+	public void setCost(int cost)
+	{
+		this.cost = cost;
 	}
 
 }
